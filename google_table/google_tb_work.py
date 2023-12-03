@@ -163,8 +163,6 @@ class WorkGoogle:
         :param date: Строка с датой в формате '%d.%m.%Y'
         :return: Дата в формате datetime.datetime(2023, 11, 1, 0, 0)
         """
-        logger.warning(f"Надо удалить пере присваивание date")
-        date = '02.12.2023'  # TODO Удалить после тестов
         date_start = dt.datetime.strptime(date, '%d.%m.%Y')
         if (dt.datetime.utcnow() - date_start).days > 365:
             date_start = dt.datetime.utcnow() - dt.timedelta(days=364)
