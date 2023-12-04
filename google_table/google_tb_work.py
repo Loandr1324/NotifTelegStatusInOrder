@@ -152,7 +152,6 @@ class WorkGoogle:
         logger.warning(f"Надо удалить пере присваивание chats_id")
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
-        chats_id = ['-1001817291153']
         return chats_id
 
     @staticmethod
