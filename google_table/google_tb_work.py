@@ -149,7 +149,6 @@ class WorkGoogle:
                                  v['status_id'] == status_id and
                                  v['user_id'] == user_id,
                                  self.users_notif))
-        logger.warning(f"Надо удалить пере присваивание chats_id")
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
         return chats_id
