@@ -79,11 +79,14 @@ class Notif:
         """
         Отправляет сообщение в чат Telegram для каждого chat_id из списка chats_id.
         """
+        any_result = False
         for chat_id in self.user_notif['chats_id']:
             logger.info(f'Отправляем сообщение в чат {chat_id}')
             result = self.telegram.send_massage_chat(chat_id)
-            if result and not self.db_product_is_notif:
-                self.add_to_data_notif_position()
+            any_result = result or any_result
+        # Записываем в таблицу отправленных уведомлений, если хотя бы одно уведомление отправлено
+        if any_result and not self.db_product_is_notif:
+            self.add_to_data_notif_position()
 
     def get_notif_db(self):
         """
