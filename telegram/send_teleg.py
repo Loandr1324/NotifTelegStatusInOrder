@@ -2,6 +2,7 @@ import telepot
 from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
 from config import TOKEN_BOT
 from loguru import logger
+import time
 
 """
 Ссылка на документацию по html форматированию сообщения в телеграмм
@@ -13,6 +14,7 @@ class NotifTelegram:
     def __init__(self):
         self.TOKEN = TOKEN_BOT
         self.message = dict.fromkeys(['text', 'keyboard'])
+        self.count_msg = 0
 
     def message_sup_order_cancel(self, num_order: str, position: dict, user_notif: dict) -> None:
         """
@@ -67,8 +69,14 @@ class NotifTelegram:
                 parse_mode="HTML",
                 reply_markup=self.message['keyboard'],
                 disable_web_page_preview=True)
+
+            self.count_msg += 1
+            if self.count_msg == 19:
+                logger.warning(f"Отправлено {self.count_msg} сообщений в телеграм. Делаем паузу 60 сек...")
+                time.sleep(60)
+                self.count_msg = 0
             return True
-        except ConnectionError as ce:
+        except Exception as e:
             logger.error('Отправка уведомления в телеграм была неудачна. Описание ошибки:')
-            logger.error(ce)
+            logger.error(e)
             return False
