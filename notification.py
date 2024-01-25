@@ -4,14 +4,15 @@ import asyncio
 from aioabcpapi import Abcp
 from data_notif.csv_work import WorkCSV
 from loguru import logger
-from config import AUTH_API
+from config import AUTH_API, FILENAME_DATA_NOTIF
+from google_table.google_tb_work import WorkGoogle
 
 host, login, password = AUTH_API['HOST_API'], AUTH_API['USER_API'], AUTH_API['PASSWORD_API']
 api = Abcp(host, login, password)
 
 
 class Notif:
-    def __init__(self, task_id, status_notif, repeat_notification, date_start, wk_g):
+    def __init__(self, task_id, status_notif, repeat_notification, date_start):
         self.user_notif = dict.fromkeys(['id', 'full_name', 'type_order', 'type_msg', 'chats_id'])
         self.order = None
         self.product = None
@@ -22,9 +23,9 @@ class Notif:
         self.statuses_notif = None
         self.list_managers = None
         self.repeat_notification = repeat_notification
-        self.work_csv = WorkCSV()
+        self.work_csv = WorkCSV(FILENAME_DATA_NOTIF)
         self.telegram = NotifTelegram()
-        self.work_google = wk_g
+        self.work_google = WorkGoogle()
         self.date_start = date_start
 
     async def staff_notif(self):
@@ -94,6 +95,7 @@ class Notif:
         """
         # Получаем из БД отправленные уведомления по товару
         self.db_product_is_notif = self.work_csv.filter(
+            type_filter='notif_cancel',
             id_order=self.order['number'],
             id_position=self.product['id'],
             id_status=self.status_notif
@@ -102,6 +104,7 @@ class Notif:
     def add_to_data_notif_position(self):
         """Добавляем данные по позиции в список отправленных уведомлений"""
         self.work_csv.add_to_data(
+            type_data = 'notif_cancel',
             id_status=self.status_notif,
             id_order=self.order['number'],
             id_position=self.product['id'],
