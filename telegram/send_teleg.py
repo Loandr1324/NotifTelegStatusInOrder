@@ -32,11 +32,15 @@ class NotifTelegram:
                 row1 = "🔴 <b>Отказ поставщика (клиент)</b>\n\n"
             elif user_notif['type_order'] == 'stock':
                 row1 = "🟡 <b>Отказ поставщика (склад)</b>\n\n"
+
         elif user_notif['msg_type'] == 'secondary':
             if user_notif['type_order'] == 'user':
                 row1 = "🔴 <b>Отказ поставщика (клиент) (ПОВТОР)</b>\n\n"
             elif user_notif['type_order'] == 'stock':
                 row1 = "🟡 <b>Отказ поставщика (склад) (ПОВТОР)</b>\n\n"
+
+        elif user_notif['msg_type'] == 'error_reorder':
+            row1 = "❌ <b>Ошибка отправки заказа поставщику</b>\n\n"
 
         url_cp_client = f'https://cpv1.pro/'
         url_order = f'{url_cp_client}?page=orders&id_order={num_order}'
@@ -48,8 +52,13 @@ class NotifTelegram:
 
         row4 = f'<code>{position["description"]}</code>\n'
         row5 = f'<b>Поставщик: </b><code>{position["distributorName"]}</code>\n\n'
-        row6 = f'<b>Клиент: </b>\n'
-        row7 = f'<i>{user_notif["full_name"]}</i>'
+
+        if user_notif['msg_type'] == 'error_reorder':
+            row6 = f'<b>Описание ошибки: </b><code>{position["error"]}</code>\n'
+            row7 = f'<i>{position["userName"]}</i>'
+        else:
+            row6 = f'<b>Клиент: </b>\n'
+            row7 = f'<i>{user_notif["full_name"]}</i>'
 
         self.message['text'] = row1 + row2 + row3 + row4 + row5 + row6 + row7
 
