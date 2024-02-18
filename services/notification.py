@@ -8,12 +8,12 @@ from config import AUTH_API, FILENAME_DATA_NOTIF
 from google_table.google_tb_work import WorkGoogle
 
 host, login, password = AUTH_API['HOST_API'], AUTH_API['USER_API'], AUTH_API['PASSWORD_API']
-api = Abcp(host, login, password)
+api_abcp = Abcp(host, login, password)
 
 
 class Notif:
     def __init__(self, task_id, status_notif, repeat_notification, date_start):
-        self.user_notif = dict.fromkeys(['id', 'full_name', 'type_order', 'type_msg', 'chats_id'])
+        self.user_notif = dict.fromkeys(['id', 'full_name', 'type_order', 'msg_type', 'chats_id'])
         self.order = None
         self.product = None
         self.db_order_is_notif = False
@@ -33,22 +33,29 @@ class Notif:
         Асинхронно получает список менеджеров из API ABCP и сохраняет его в атрибуте `list_managers`.
         """
         try:
-            self.list_managers = await api.cp.admin.staff.get()
+            self.list_managers = await api_abcp.cp.admin.staff.get()
         except Exception as e:
             logger.error(f"Ошибка при получении списка менеджеров: {e}")
 
-    async def get_order_by_status_notif(self):
+    async def get_order_by_status(self):
         """
-        Асинхронно получает список заказов с определенным статусом для уведомлений из API ABCP и возвращает его.
-        :return: Список заказов с определенным статусом для уведомлений.
+        Асинхронно получает список заказов с определенным статусом для уведомлений из API ABCP.
+        :return: Словарь с данными по заказам:
+            ['count'] -> количество полученных заказов
+            ['items'] -> данные по заказам
         """
-        orders = []
+        orders = {}
         try:
-            orders = await api.cp.admin.orders.get_orders_list(
+            logger.info(f"Получаем список заказов по статусу {self.status_notif}")
+            orders = await api_abcp.cp.admin.orders.get_orders_list(
                 status_code=self.status_notif, date_created_start=self.date_start, format='p'
             )
+            logger.info(f"Получили по статусу {self.status_notif} {orders['count']} заказа(ов)")
         except Exception as e:
-            logger.error(f"Ошибка при получении списка заказов: {e}")
+            logger.error(f"Ошибка при получении заказов с платформы ABCP: {e}")
+
+        if not orders['items']:
+            logger.info(f"Заказов по указанному статусу {self.status_notif} нет")
         return orders
 
     def create_message(self):
@@ -148,16 +155,7 @@ class Notif:
         Асинхронно отправляет уведомления в Telegram в соответствии с текущим статусом уведомления.
         """
         # получаем список заказов по статусу для уведомлений
-        orders = {}
-        try:
-            logger.info(f"Получаем список заказов с необходимыми статусами")
-            orders = await self.get_order_by_status_notif()
-        except Exception as e:
-            logger.error(f"Ошибка при получении заказов с платформы ABCP: {e}")
-        logger.info(f"Получили для уведомлений {orders['count']} заказ(ов)")
-
-        if not orders['items']:
-            return logger.info("Заказов для уведомления по указанному статусу нет")
+        orders = await self.get_order_by_status()
 
         logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
         await self.staff_notif()
@@ -188,7 +186,7 @@ class Notif:
                 self.send_message_telegram()
                 logger.info(f"Сообщение отправлено по заказу №{self.order['number']} со статусом: {self.status_notif}")
         self.work_csv.add_data_file()
-        await api.close()
+        await api_abcp.close()
 
     def start_notif(self):
         asyncio.run(self.send_notif_by_status())
