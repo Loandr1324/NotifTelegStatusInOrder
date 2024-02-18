@@ -1,7 +1,7 @@
 # Author Loik Andrey mail: loikand@mail.ru
 from config import FILE_NAME_LOG
-from notification import Notif
-from google_table.google_tb_work import WorkGoogle
+from services.notification import Notif
+from services.supplier_reorder import ReOrder
 from tasks import Tasks
 from loguru import logger
 
@@ -45,10 +45,18 @@ def main() -> None:
                 logger.error(f"Произошла ошибка при выполнении задачи по отправке уведомлений {e}")
         elif task['task_id'] == '2' and task['can_run_task']:
             logger.warning(f"Запускаем выполнение задачи по отправке Заказов поставщикам")
+            sup_reorder = ReOrder(
+                task_id=task['task_id'],
+                status_reorder=task['status_id'],
+                # repeat_notification=task['repeat'],
+                date_start=task['date_start'],
+                retry_count=task['retry_count']
+            )
+            sup_reorder.supplier_reorder()
         elif not task['can_run_task']:
             logger.info(f"Интервал времени для запуска задачи №{task['task_id']} - \"{task['task_name']}\" не прошёл.")
         else:
-            logger.warning(f"Нет алгоритма для отработка этой задачи. Необходимо связаться с заказчиком")
+            logger.error(f"Нет алгоритма для отработка этой задачи. Необходимо связаться с заказчиком")
     logger.info(f"... Окончание работы программы")
     return
 
