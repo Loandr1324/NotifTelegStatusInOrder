@@ -90,6 +90,7 @@ class WorkCSV:
                 'position_id': kwargs['position_id'],
                 'count_error': kwargs['count_error'],
                 'data_error': kwargs['data_error'],
+                'text_error': kwargs['text_error']
             }]
 
     def add_data_file(self, mode="a"):
