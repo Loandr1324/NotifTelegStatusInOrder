@@ -58,8 +58,15 @@ class WorkCSV:
                         v["id_order"] == kwargs['id_order'] and
                         v["id_position"] == kwargs['id_position'],
                         self._data))
+
         elif kwargs['type_filter'] == 'tasks':
             return list(filter(lambda v: v['task_id'] == kwargs['task_id'], self._data))
+
+        elif kwargs['type_filter'] == 'reorder_error':
+            return list(filter(lambda v: v['supplier_id'] == kwargs['supplier_id'] and
+                               v['position_id'] == kwargs['position_id']
+                               , self._data))
+
         else:
             return []
 
@@ -76,6 +83,13 @@ class WorkCSV:
             self._new_data += [{
                 'task_id': kwargs['task_id'],
                 'task_last_start': kwargs['task_last_start']
+            }]
+        elif kwargs['type_data'] == 'reorder_error':
+            self._new_data += [{
+                'supplier_id': kwargs['supplier_id'],
+                'position_id': kwargs['position_id'],
+                'count_error': kwargs['count_error'],
+                'data_error': kwargs['data_error'],
             }]
 
     def add_data_file(self, mode="a"):
