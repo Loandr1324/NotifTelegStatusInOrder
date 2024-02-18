@@ -101,13 +101,14 @@ class WorkGoogle:
             "status_id" - Идентификатор статуса позиции
             "date_start" - Дата с которой загружаем заказы
             "repeat" - Требуется ли отправлять повторные уведомления
+            "retry_count" - Количество попыток оформления заказов
             "temp_not1" - Шаблон первичного уведомления
             "temp_not2" - Шаблон повторного уведомления
             ]
         """
         params_head = [
             "task_id", "task_name", "task_interval",
-            "status_name", "status_id", "date_start", "repeat", "temp_not1", "temp_not2"
+            "status_name", "status_id", "date_start", "repeat", "retry_count", "temp_not1", "temp_not2"
         ]
         notif = []
         tasks = self._rw_google.read_sheet(1)
@@ -128,30 +129,95 @@ class WorkGoogle:
             'status_id': Идентификатор статуса по которому отправляется уведомления,
             'user_name': ФИО получателя уведомления,
             'user_id': Идентификатор пользователя на платформе ABCP,
+            "manager_id": Идентификатор менеджера на платформе ABCP,
             'tel_chat_id': Идентификатор чата для отправки уведомления (бот должен быть в этом чате)
             },
             ...,
             ]
         """
         list_users_notif = self._rw_google.read_sheet(2)
-        params_head = ["task_id", "status_id", "user_name", "user_id", "tel_chat_id"]
+        params_head = ["task_id", "status_id", "user_name", "user_id", "manager_id", "tel_chat_id", "reorder_auto"]
         for val in list_users_notif[1:]:
             params_user_notif = dict(zip(params_head, val))
             self.users_notif += [params_user_notif]
 
-    def get_chat_id_notif(self, task_id: str, status_id: str, user_id: str):
+    def get_chat_id_notif(self, task_id: str, status_id: str, search_id: str, type_search: str = 'user') -> list:
         """
+        Получаем список идентификаторов чатов телеграмм
+        :return: list[str]
+        """
+        task_id = task_id or '1'
+        status_id = status_id or '144931'
 
-        :return:
-        """
-        user_notif = list(filter(lambda v:
-                                 v['task_id'] == task_id and
-                                 v['status_id'] == status_id and
-                                 v['user_id'] == user_id,
-                                 self.users_notif))
+        type_id = 'user_id' if type_search == 'user' else 'manager_id'
+
+        user_notif = [v for v in self.users_notif if
+                      v['task_id'] == task_id and v['status_id'] == status_id and v[type_id] == search_id]
+
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
+        # chats_id = ['-1001817291153']  # TODO Удалить после тестов
         return chats_id
+
+    def get_supplier_params(self) -> list[dict]:
+        """
+        Получаем вторую строку с четвёртой страницы и возвращаем их в словаре с предварительно заданными ключами
+        :return: list[dict]
+            ключи словаря[
+            "supplier_id" - идентификатор поставщика на платформе ABCP,
+            "supplier_name" - наименование поставщика,
+            "reorder_auto" - разрешение на оформление перезаказа,
+            ... параметры для заказа (уникальные для каждого поставщика)
+            ]
+        """
+        suppliers_params = []
+        sheet_suppliers_setting = self._rw_google.read_sheet(3)
+        params_head = ["supplier_id", "supplier_name", "reorder_auto"]
+        date_now = dt.datetime.now().strftime('%Y-%m-%d')
+        for val in sheet_suppliers_setting[1:]:
+            row = dict(zip(params_head, val[:3]))
+            row['params'] = {}
+            params_order_list = val[3:19]
+            params_position_list = val[19:]
+            row['params']['orderParams'] = {
+                params_order_list[i]: params_order_list[i + 1] for i in
+                range(0, len(params_order_list), 2) if params_order_list[i].lower() != 'нет'
+            }
+            row['params']['positionParams'] = {
+                params_position_list[i]: params_position_list[i + 1] for i in
+                range(0, len(params_position_list), 2) if params_position_list[i].lower() != 'нет'
+            }
+
+            if 'shipmentDate' in row['params']['orderParams']:
+                row['params']['orderParams']['shipmentDate'] = date_now
+            if 'shipmentDateDelivery' in row['params']['orderParams']:
+                row['params']['orderParams']['shipmentDateDelivery'] = date_now
+
+            row['reorder_auto'] = self.convert_yes_no_to_bool(str(row['reorder_auto']))
+
+            suppliers_params += [row]
+        return suppliers_params
+
+    def get_user_reorder_auto(self) -> list[dict]:
+        """
+        Получаем вторую строку с пятой страницы и возвращаем их в словаре с предварительно заданными ключами
+        :return: dict
+            ключи словаря[
+            "user_id" - Идентификатор пользователя на платформе ABCP,
+            "manager_id" - Идентификатор менеджера на платформе ABCP,
+            "user_name" - ФИО пользователя,
+            "user_reorder_auto" - разрешение на оформление автоперезаказа
+            ]
+        """
+        users_reorder_auto = []
+        sheet_users_reorder_auto = self._rw_google.read_sheet(4)
+        params_head = ["user_id", "manager_id", "user_name", "user_reorder_auto"]
+
+        for val in sheet_users_reorder_auto[1:]:
+            row = dict(zip(params_head, val))
+            row['user_reorder_auto'] = self.convert_yes_no_to_bool(str(row['user_reorder_auto']))
+            users_reorder_auto += [row]
+        return users_reorder_auto
 
     @staticmethod
     def convert_date_notif(date: str) -> datetime.datetime:
@@ -167,15 +233,15 @@ class WorkGoogle:
         return date_start
 
     @staticmethod
-    def convert_repeat_notif(repeat_value: str) -> bool:
+    def convert_yes_no_to_bool(value: str) -> bool:
         """
         Преобразуем значения
         Если дата больше года, то берем заказы за последние 364 дня.
-        :param repeat_value: Строка со значением повтора уведомления. Допустимые значения: "да" или "нет"
+        :param value: Строка со значением повтора уведомления. Допустимые значения: "да" или "нет"
         :return: bool
         """
-        repeat_value = repeat_value.lower()
-        return True if repeat_value == "да" else False if repeat_value == "нет" else None
+        value = value.lower()
+        return True if value == "да" else False if value == "нет" else None
 
     def convert_value(self, dict_params: dict) -> dict:
         """
@@ -186,5 +252,5 @@ class WorkGoogle:
         :return: Преобразованный словарь
         """
         dict_params['date_start'] = self.convert_date_notif(dict_params['date_start'])
-        dict_params['repeat'] = self.convert_repeat_notif(dict_params['repeat'])
+        dict_params['repeat'] = self.convert_yes_no_to_bool(dict_params['repeat'])
         return dict_params
