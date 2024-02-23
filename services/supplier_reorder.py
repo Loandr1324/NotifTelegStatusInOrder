@@ -4,7 +4,7 @@ import asyncio
 from api_abcp.abcp_work import WorkABCP
 from data_notif.csv_work import WorkCSV
 from loguru import logger
-from config import FILENAME_REORDER_ERROR
+from config import FILENAME_REORDER_ERROR, OUR_STOCK
 from google_table.google_tb_work import WorkGoogle
 
 
@@ -297,7 +297,7 @@ class ReOrder:
         self.get_suppliers_for_order()
 
         # Разделяем позиции заказов и создаём словарь с данными для оформления заказов
-        await self.sort_position_for_order(['1599030'])
+        await self.sort_position_for_order(OUR_STOCK)
 
         logger.info(f"Поставщики для заказа {self.positions_reorder_suppliers}")
         logger.error(f"Заблокированные поставщики {self.blocked_positions_suppliers}")
