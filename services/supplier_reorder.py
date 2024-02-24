@@ -238,9 +238,9 @@ class ReOrder:
                     for i, position in enumerate(self.positions_reorder_suppliers[supplier]['positions']):
                         if res_pos['reference'] == position['id']:
                             self.add_error_data(res_pos['status'], position, supplier)
-                        else:
-                            logger.info(f"Оформлен заказ поставщику пакетом позиций: {supplier}")
-                            logger.info(f"Результат оформления: {res_order}")
+            else:
+                logger.info(f"Оформлен заказ поставщику по части позиций: {supplier}")
+                logger.info(f"Результат оформления: {res_order}")
 
     def check_result_errors(self, result, supplier):
         """Проверяем результат полученный по API на ошибки"""
@@ -253,6 +253,9 @@ class ReOrder:
 
         elif isinstance(result, list) and any("с ошибкой #1" in res_order['number'] for res_order in result):
             self.add_error_data_for_position(result, supplier)
+        else:
+            logger.info(f"Оформлен заказ поставщику пакетом позиций: {supplier}")
+            logger.info(f"Результат оформления: {result}")
 
         # Записываем все данные об ошибках в базу данных
         self.work_csv_error.add_data_file(mode="w")
