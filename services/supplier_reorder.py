@@ -200,56 +200,62 @@ class ReOrder:
                 order_params=self.positions_reorder_suppliers[supplier]['orderParams'],
                 positions=self.positions_reorder_suppliers[supplier]['position_for_order']
             )
-            if 'error' in result:
-                self.reorder_error[supplier] = self.positions_reorder_suppliers[supplier]
-                self.reorder_error[supplier]['error'] = result['error']
-            else:
-                logger.info(f"Оформлен заказ поставщику пакетом позиций: {supplier}")
-                logger.info(f"Результат оформления: {result}")
 
-    async def work_to_error_supplier(self):
-        """Обработка ошибок при отправке заказов поставщику пакетами и попытка отправки по позициям"""
+            # Проверяем результат на ошибки
+            self.check_result_errors(result, supplier)
 
-        for supplier in self.reorder_error:
-            for i, position in enumerate(self.reorder_error[supplier]['positions']):
-                if int(position['count_error']) < self.retry_count - 1:
-                    count_error = str(int(position['count_error']) + 1)
-                    # Заполняем данные об ошибке для дальнейшей записи в БД
-                    self.work_csv_error.add_to_data(
-                        type_data='reorder_error',
-                        supplier_id=supplier,
-                        position_id=position['id'],
-                        count_error=count_error,
-                        data_error=dt.now().strftime('%Y-%m-%d %H:%M:%S'),
-                        text_error=self.reorder_error[supplier]['error']
-                    )
+    def add_error_data(self, text_error, position, supplier):
+        """Добавляем данные по позициям в базу данных об ошибках"""
+        if int(position['count_error']) < self.retry_count - 1:
+            count_error = str(int(position['count_error']) + 1)
 
-                else:
-                    logger.info(f" Оформляем заказы по позициям по поставщику: {supplier} и позиции: {position['id']}")
-                    if self.reorder_error[supplier]['position_for_order'][i]['id'] == position['id']:
-                        result = await self.work_abcp.create_order_supplier(
-                            order_params=self.reorder_error[supplier]['orderParams'],
-                            positions=self.reorder_error[supplier]['position_for_order'][i]
-                        )
-                        if 'error' in result:
-                            self.work_csv_error.add_to_data(
-                                type_data='reorder_error',
-                                supplier_id=supplier,
-                                position_id=position['id'],
-                                count_error=str(self.retry_count),
-                                data_error=dt.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                text_error=result['error']
-                            )
-                            # Добавляем позиции в список для уведомлений менеджерам
-                            position['error'] = result['error']
-                            self.error_positions_notify.append(position)
+        else:
+            count_error = str(self.retry_count)
+            # Добавляем позиции в список для уведомлений менеджерам
+            position['error'] = text_error
+            self.error_positions_notify.append(position)
 
+        # Заполняем данные об ошибке для дальнейшей записи в БД
+        self.work_csv_error.add_to_data(
+            type_data='reorder_error',
+            supplier_id=supplier,
+            position_id=position['id'],
+            count_error=count_error,
+            data_error=dt.now().strftime('%Y-%m-%d %H:%M:%S'),
+            text_error=text_error
+        )
+
+    def add_error_data_for_supplier(self, text_error, supplier):
+        """Добавляем данные об ошибки в массив для записи в базу данных по всем позициям поставщика"""
+        for position in self.positions_reorder_suppliers[supplier]['positions']:
+            self.add_error_data(text_error, position, supplier)
+
+    def add_error_data_for_position(self, result, supplier):
+        """Добавляем данные об ошибки в массив для записи в базу данных по каждой поставщика"""
+        for res_order in result:
+            if "с ошибкой #1" in res_order['number']:
+                for res_pos in res_order['positions']:
+                    for i, position in enumerate(self.positions_reorder_suppliers[supplier]['positions']):
+                        if res_pos['reference'] == position['id']:
+                            self.add_error_data(res_pos['status'], position, supplier)
                         else:
-                            logger.info(f"Оформлен заказ поставщику: {supplier} по позиции: {position['id']}")
-                            logger.info(f"Результат оформления: {result}")
+                            logger.info(f"Оформлен заказ поставщику пакетом позиций: {supplier}")
+                            logger.info(f"Результат оформления: {res_order}")
 
+    def check_result_errors(self, result, supplier):
+        """Проверяем результат полученный по API на ошибки"""
+
+        if not result:
+            self.add_error_data_for_supplier("Нет результатов при оформлении заказа", supplier)
+
+        elif 'errorMessage' in result:
+            self.add_error_data_for_supplier(result['errorMessage'], supplier)
+
+        elif isinstance(result, list) and any("с ошибкой #1" in res_order['number'] for res_order in result):
+            self.add_error_data_for_position(result, supplier)
+
+        # Записываем все данные об ошибках в базу данных
         self.work_csv_error.add_data_file(mode="w")
-        return
 
     def send_error_message(self):
         """
@@ -312,11 +318,9 @@ class ReOrder:
         # Оформляем заказы у поставщиков пакетами
         await self.send_orders_to_supplier()
 
-        # Отрабатываем ошибки
-        if self.reorder_error:
-            await self.work_to_error_supplier()
-            if self.error_positions_notify:
-                self.send_error_message()
+        # Отправляем данные об ошибках в телеграм
+        if self.error_positions_notify:
+            self.send_error_message()
 
         await self.work_abcp.api_abcp.close()
 
