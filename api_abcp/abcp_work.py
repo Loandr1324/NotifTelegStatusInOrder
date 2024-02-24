@@ -48,15 +48,12 @@ class WorkABCP:
         """
 
         try:
-            # raise Exception({
-            #     "errorCode": 200,
-            #     "errorMessage": "Позиция 151056635 уже была отправлена поставщику в заказ ранее."
-            # })  # Используем вызов ошибки при тестах
             result = await self.api_abcp.cp.admin.orders.send_online_order(
                 order_params=order_params,
                 positions=positions
             )
-            return result
         except Exception as ex:
-            logger.warning(ex)
-            return {'error': ex}
+            logger.error(ex)
+            result = {'errorMessage': ex}
+
+        return result
