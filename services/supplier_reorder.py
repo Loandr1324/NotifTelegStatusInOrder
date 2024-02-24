@@ -239,7 +239,7 @@ class ReOrder:
                         if res_pos['reference'] == position['id']:
                             self.add_error_data(res_pos['status'], position, supplier)
             else:
-                logger.info(f"Оформлен заказ поставщику по части позиций: {supplier}")
+                logger.info(f"Оформлен заказ поставщику по позициям: {supplier}")
                 logger.info(f"Результат оформления: {res_order}")
 
     def check_result_errors(self, result, supplier):
