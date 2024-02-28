@@ -36,7 +36,7 @@ class Tasks:
                 new_task = True
 
             # Определяем возможность запуска задачи и подготавливаем данные по времени запуска в файл
-            if delta.total_seconds() > float(task['task_interval']) or new_task:
+            if delta.total_seconds() + 10 > float(task['task_interval']) or new_task:
                 self.tasks[i]['can_run_task'] = True
                 logger.warning(task_prev_start)
                 self.prev_task_times.add_to_data(
