@@ -52,7 +52,7 @@ class Tasks:
             if (time_interval_start > float(task['task_interval']) or new_task) and is_working_hours:
                 self.tasks[i]['can_run_task'] = True
                 task_last_start = date_now.strftime('%Y-%m-%d %H:%M:%S')
-                task_id = task['task_id'],
+                task_id = task['task_id']
             else:
                 self.tasks[i]['can_run_task'] = False
                 task_last_start = task_prev_start['task_last_start']
