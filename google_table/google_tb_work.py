@@ -96,18 +96,20 @@ class WorkGoogle:
             ключи словаря [
             "task_id" - Номер события,
             "task_name" - Наименование события
+            "time_start" - Время начала работы скрипта
+            "time_finish" - Время окончания работы скрипта
             "task_interval" - Интервал запуска, сек
             "status_name" - Наименование статуса позиции
             "status_id" - Идентификатор статуса позиции
             "date_start" - Дата с которой загружаем заказы
             "repeat" - Требуется ли отправлять повторные уведомления
-            "retry_count" - Количество попыток оформления заказов
+            "retry_count" - Количество попыток оформления заказов поставщикам
             "temp_not1" - Шаблон первичного уведомления
             "temp_not2" - Шаблон повторного уведомления
             ]
         """
         params_head = [
-            "task_id", "task_name", "task_interval",
+            "task_id", "task_name", "time_start", "time_finish", "task_interval",
             "status_name", "status_id", "date_start", "repeat", "retry_count", "temp_not1", "temp_not2"
         ]
         notif = []
@@ -230,7 +232,7 @@ class WorkGoogle:
         return users_reorder_auto
 
     @staticmethod
-    def convert_date_notif(date: str) -> datetime.datetime:
+    def convert_date(date: str) -> datetime.datetime:
         """
         Преобразуем дату полученной из Google таблицы в необходимый формат
         Если дата больше года, то берем заказы за последние 364 дня.
@@ -241,6 +243,15 @@ class WorkGoogle:
         if (dt.datetime.utcnow() - date_start).days > 365:
             date_start = dt.datetime.utcnow() - dt.timedelta(days=364)
         return date_start
+
+    @staticmethod
+    def convert_time(time: str) -> datetime.time:
+        """
+        Преобразуем время полученное из Google таблицы в необходимый формат
+        :param time: Строка с датой в формате '%H-%M'
+        :return: Дата в формате datetime.time(HH, MM)
+        """
+        return datetime.datetime.strptime(time, '%H-%M').time()
 
     @staticmethod
     def convert_yes_no_to_bool(value: str) -> bool:
@@ -257,10 +268,14 @@ class WorkGoogle:
         """
         Преобразовывает значения словаря полученной задачи 'date_start' и 'repeat' в нужный формат
         'date_start' -> datetime.datetime
+        'time_start' -> datetime.time
+        'time_finish -> datetime.time
         'repeat' -> bool
-        :param dict_params: Словарь с ключами 'date_start' и 'repeat'
+        :param dict_params: Словарь с ключами 'date_start', 'time_start', 'time_finish' и 'repeat'
         :return: Преобразованный словарь
         """
-        dict_params['date_start'] = self.convert_date_notif(dict_params['date_start'])
+        dict_params['date_start'] = self.convert_date(dict_params['date_start'])
+        dict_params['time_start'] = self.convert_time(dict_params['time_start'])
+        dict_params['time_finish'] = self.convert_time(dict_params['time_finish'])
         dict_params['repeat'] = self.convert_yes_no_to_bool(dict_params['repeat'])
         return dict_params
