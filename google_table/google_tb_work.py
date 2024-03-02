@@ -68,6 +68,18 @@ class RWGoogle:
             logger.error(f"Ошибка при получении списка имён страниц: {e}")
         return sheet.get_all_values()
 
+    def save_cell(self, worksheet_id: int, row: int, col: int, value: str):
+        """Записываем данные в ячейку"""
+        try:
+            sheet = self._gc.open_by_key(self.key_wb).get_worksheet(worksheet_id)
+            return sheet.update_cell(row, col, value)
+
+        except gspread.exceptions.APIError as e:
+            logger.error(f"Ошибка при получении списка настроек: {e}")
+
+        except Exception as e:
+            logger.error(f"Ошибка при получении списка имён страниц: {e}")
+
 
 class WorkGoogle:
     def __init__(self):
@@ -104,13 +116,14 @@ class WorkGoogle:
             "date_start" - Дата с которой загружаем заказы
             "repeat" - Требуется ли отправлять повторные уведомления
             "retry_count" - Количество попыток оформления заказов поставщикам
+            "last_start" - последний старт задачи
             "temp_not1" - Шаблон первичного уведомления
             "temp_not2" - Шаблон повторного уведомления
             ]
         """
         params_head = [
-            "task_id", "task_name", "time_start", "time_finish", "task_interval",
-            "status_name", "status_id", "date_start", "repeat", "retry_count", "temp_not1", "temp_not2"
+            "task_id", "task_name", "time_start", "time_finish", "task_interval", "status_name",
+            "status_id", "date_start", "repeat", "retry_count", "last_start", "temp_not1", "temp_not2"
         ]
         notif = []
         tasks = self._rw_google.read_sheet(1)
@@ -186,19 +199,12 @@ class WorkGoogle:
                 params_order_list[i + 1]
                 for i in range(0, len(params_order_list), 2) if params_order_list[i].lower() != 'нет'
             }
-            # row['params']['orderParams'] = {
-            #     params_order_list[i]: params_order_list[i + 1] for i in
-            #     range(0, len(params_order_list), 2) if params_order_list[i].lower() != 'нет'
-            # }
+
             row['params']['positionParams'] = {
                 params_position_list[i]: int(params_position_list[i + 1]) if params_position_list[i + 1].isdigit() else
                 params_position_list[i + 1]
                 for i in range(0, len(params_position_list), 2) if params_position_list[i].lower() != 'нет'
             }
-            # row['params']['positionParams'] = {
-            #     params_position_list[i]: params_position_list[i + 1] for i in
-            #     range(0, len(params_position_list), 2) if params_position_list[i].lower() != 'нет'
-            # }
 
             if 'shipmentDate' in row['params']['orderParams']:
                 row['params']['orderParams']['shipmentDate'] = date_now
@@ -231,6 +237,13 @@ class WorkGoogle:
             users_reorder_auto += [row]
         return users_reorder_auto
 
+    def set_tasks_last_start(self, row: int, value: str) -> None:
+        """Записываем данные о последнем запуске задачи
+        :param row: Номер строки задачи
+        :param value: Значение даты последнего запуска в формате '%Y-%m-%d %H:%M:%S'
+        """
+        self._rw_google.save_cell(1, row, 11, value)
+
     @staticmethod
     def convert_date(date: str) -> datetime.datetime:
         """
@@ -254,6 +267,15 @@ class WorkGoogle:
         return datetime.datetime.strptime(time, '%H-%M').time()
 
     @staticmethod
+    def convert_date_time(date_time: str) -> datetime.datetime:
+        """
+        Преобразуем время полученное из Google таблицы в необходимый формат
+        :param date_time: Строка с датой в формате '%Y-%m-%d %H:%M:%S'
+        :return: Дата в формате datetime.datetime(2023, 11, 1, 0, 0, 0)
+        """
+        return datetime.datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
+
+    @staticmethod
     def convert_yes_no_to_bool(value: str) -> bool:
         """
         Преобразуем значения
@@ -266,15 +288,18 @@ class WorkGoogle:
 
     def convert_value(self, dict_params: dict) -> dict:
         """
-        Преобразовывает значения словаря полученной задачи 'date_start' и 'repeat' в нужный формат
+        Преобразовывает значения словаря полученной задачи 'date_start', 'last_start', 'time_start', 'time_finish' и
+        'repeat' в нужный формат
         'date_start' -> datetime.datetime
+        'last_start' -> datetime.datetime
         'time_start' -> datetime.time
         'time_finish -> datetime.time
         'repeat' -> bool
-        :param dict_params: Словарь с ключами 'date_start', 'time_start', 'time_finish' и 'repeat'
+        :param dict_params: Словарь с ключами 'date_start', 'last_start', 'time_start', 'time_finish' и 'repeat'
         :return: Преобразованный словарь
         """
         dict_params['date_start'] = self.convert_date(dict_params['date_start'])
+        dict_params['last_start'] = self.convert_date_time(dict_params['last_start'])
         dict_params['time_start'] = self.convert_time(dict_params['time_start'])
         dict_params['time_finish'] = self.convert_time(dict_params['time_finish'])
         dict_params['repeat'] = self.convert_yes_no_to_bool(dict_params['repeat'])
