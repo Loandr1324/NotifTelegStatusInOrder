@@ -119,6 +119,7 @@ class WorkGoogle:
             "last_start" - последний старт задачи
             "temp_not1" - Шаблон первичного уведомления
             "temp_not2" - Шаблон повторного уведомления
+            "row_task_on_sheet" - Номер строки задачи на листе Google sheets
             ]
         """
         params_head = [
@@ -126,11 +127,14 @@ class WorkGoogle:
             "status_id", "date_start", "repeat", "retry_count", "last_start", "temp_not1", "temp_not2"
         ]
         notif = []
+        i = 2  # Первоначальный Номер строки считываемой задачи
         tasks = self._rw_google.read_sheet(1)
         for val in tasks[1:]:
             params_user_notif = dict(zip(params_head, val))
             params_user_notif = self.convert_value(params_user_notif)
+            params_user_notif['row_task_on_sheet'] = i
             notif += [params_user_notif]
+            i += 1
         return notif
 
     def get_users_notif(self):
