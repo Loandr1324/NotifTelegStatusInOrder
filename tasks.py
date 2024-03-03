@@ -53,6 +53,13 @@ class Tasks:
                 self.tasks[i]['can_run_task'] = True
                 task_last_start = date_now.strftime('%Y-%m-%d %H:%M:%S')
                 task_id = task['task_id']
+
+                # Добавляем запись о последнем запуске задачи в Google Sheets
+                WorkGoogle().set_tasks_last_start(
+                    row=task['row_task_on_sheet'],
+                    value=date_now.strftime('%Y-%m-%d %H:%M:%S')
+                )
+
             else:
                 self.tasks[i]['can_run_task'] = False
                 task_last_start = task_prev_start['task_last_start']
