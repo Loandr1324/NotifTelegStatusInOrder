@@ -200,8 +200,10 @@ class WorkGoogle:
             params_order_list = val[3:19]
             params_position_list = val[19:]
             row['params']['orderParams'] = {
-                params_order_list[i]: int(params_order_list[i + 1]) if params_order_list[i + 1].isdigit() else
-                params_order_list[i + 1]
+                params_order_list[i]:
+                    int(params_order_list[i + 1])
+                    if params_order_list[i + 1].isdigit() and not params_order_list[i + 1].startswith("000")
+                    else params_order_list[i + 1]
                 for i in range(0, len(params_order_list), 2) if params_order_list[i].lower() != 'нет'
             }
 
