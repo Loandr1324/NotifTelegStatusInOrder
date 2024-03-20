@@ -193,6 +193,7 @@ class WorkGoogle:
         sheet_suppliers_setting = self._rw_google.read_sheet(3)
         params_head = ["supplier_id", "supplier_name", "reorder_auto"]
         date_now = dt.datetime.now().strftime('%Y-%m-%d')
+        date_tomorrow = (dt.datetime.now() + dt.timedelta(days=1)).strftime('%Y-%m-%d')
         for val in sheet_suppliers_setting[1:]:
             row = dict(zip(params_head, val[:3]))
             row['params'] = {}
@@ -213,7 +214,7 @@ class WorkGoogle:
             if 'shipmentDate' in row['params']['orderParams']:
                 row['params']['orderParams']['shipmentDate'] = date_now
             if 'shipmentDateDelivery' in row['params']['orderParams']:
-                row['params']['orderParams']['shipmentDateDelivery'] = date_now
+                row['params']['orderParams']['shipmentDateDelivery'] = date_tomorrow
 
             row['reorder_auto'] = self.convert_yes_no_to_bool(str(row['reorder_auto']))
 
