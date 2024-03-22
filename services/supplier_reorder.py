@@ -249,12 +249,18 @@ class ReOrder:
             self.add_error_data_for_supplier("Нет результатов при оформлении заказа", supplier)
 
         elif 'errorMessage' in result:
+            # Получаем текстовое описание ошибки
+            try:
+                result['errorMessage'] = result['errorMessage'].args[0]['errorMessage']
+            except (TypeError, KeyError):
+                logger.error(f"Не удалось получить значения ошибки по ключу 'errorMessage'")
+
             self.add_error_data_for_supplier(result['errorMessage'], supplier)
 
         elif isinstance(result, list) and any("с ошибкой #1" in res_order['number'] for res_order in result):
             self.add_error_data_for_position(result, supplier)
         else:
-            logger.info(f"Оформлен заказ поставщику пакетом позиций: {supplier}")
+            logger.info(f"Оформлен заказ поставщику: {supplier}")
             logger.info(f"Результат оформления: {result}")
 
         # Записываем все данные об ошибках в базу данных
@@ -310,6 +316,17 @@ class ReOrder:
 
         logger.info(f"Поставщики для заказа {self.positions_reorder_suppliers}")
         logger.error(f"Заблокированные поставщики {self.blocked_positions_suppliers}")
+
+        # TODO Закомментировать после тестов
+        # Получаем параметры для заказа по заблокированным поставщикам
+        # if self.blocked_positions_suppliers:
+        #     logger.debug(self.blocked_positions_suppliers)
+        #     for key in self.blocked_positions_suppliers:
+        #         logger.debug(key)
+        #         params = await self.work_abcp.api_abcp.cp.admin.orders.get_online_order_params(
+        #             self.blocked_positions_suppliers[key]
+        #         )
+        #         logger.debug(params)
 
         # Проверяем позиции для заказа на ранее допущенные ошибки при оформлении заказов и подставляем количество ошибок
         self.check_position_for_error()
