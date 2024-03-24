@@ -2,6 +2,8 @@
 from config import FILE_NAME_LOG
 from services.notification import Notif
 from services.supplier_reorder import ReOrder
+from google_table.google_tb_work import WorkGoogle
+from datetime import datetime as dt
 from tasks import Tasks
 from loguru import logger
 
@@ -41,6 +43,13 @@ def main() -> None:
                     date_start=task['date_start']
                 )
                 notif.start_notif()
+
+                # Добавляем запись о последнем запуске задачи в Google Sheets
+                date_now = dt.now()
+                WorkGoogle().set_tasks_last_start(
+                    row=task['row_task_on_sheet'],
+                    value=date_now.strftime('%Y-%m-%d %H:%M:%S')
+                )
             except Exception as e:
                 logger.error(f"Произошла ошибка при выполнении задачи по отправке уведомлений {e}")
         elif task['task_id'] == '2' and task['can_run_task']:
@@ -53,6 +62,14 @@ def main() -> None:
                 retry_count=task['retry_count']
             )
             sup_reorder.supplier_reorder()
+
+            # Добавляем запись о последнем запуске задачи в Google Sheets
+            date_now = dt.now()
+            WorkGoogle().set_tasks_last_start(
+                row=task['row_task_on_sheet'],
+                value=date_now.strftime('%Y-%m-%d %H:%M:%S')
+            )
+
         elif not task['can_run_task']:
             logger.info(f"Интервал времени для запуска задачи №{task['task_id']} - \"{task['task_name']}\" не прошёл.")
         else:
