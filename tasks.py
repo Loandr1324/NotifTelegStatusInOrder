@@ -53,7 +53,10 @@ class Tasks:
                 self.tasks[i]['can_run_task'] = True
                 task_last_start = date_now.strftime('%Y-%m-%d %H:%M:%S')
                 task_id = task['task_id']
-
+            elif new_task and not is_working_hours:
+                self.tasks[i]['can_run_task'] = False
+                task_last_start = '2024-01-01 00:00:00'
+                task_id = task['task_id']
             else:
                 self.tasks[i]['can_run_task'] = False
                 task_last_start = task_prev_start['task_last_start']
