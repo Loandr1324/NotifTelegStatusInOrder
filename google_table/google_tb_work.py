@@ -214,7 +214,7 @@ class WorkGoogle:
             }
 
             if 'shipmentDate' in row['params']['orderParams']:
-                row['params']['orderParams']['shipmentDate'] = date_now
+                row['params']['orderParams']['shipmentDate'] = date_tomorrow
             if 'shipmentDateDelivery' in row['params']['orderParams']:
                 row['params']['orderParams']['shipmentDateDelivery'] = date_tomorrow
 
