@@ -257,7 +257,7 @@ class ReOrder:
 
             self.add_error_data_for_supplier(result['errorMessage'], supplier)
 
-        elif isinstance(result, list) and any("с ошибкой #1" in res_order['number'] for res_order in result):
+        elif isinstance(result, list) and any("с ошибкой" in res_order['number'] for res_order in result):
             self.add_error_data_for_position(result, supplier)
         else:
             logger.info(f"Оформлен заказ поставщику: {supplier}")
