@@ -233,7 +233,7 @@ class ReOrder:
     def add_error_data_for_position(self, result, supplier):
         """Добавляем данные об ошибки в массив для записи в базу данных по каждой поставщика"""
         for res_order in result:
-            if "с ошибкой #1" in res_order['number']:
+            if "с ошибкой" in res_order['number']:
                 for res_pos in res_order['positions']:
                     for i, position in enumerate(self.positions_reorder_suppliers[supplier]['positions']):
                         if res_pos['reference'] == position['id']:
