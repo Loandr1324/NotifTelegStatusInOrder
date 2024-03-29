@@ -173,8 +173,10 @@ class Notif:
                     logger.info(f"Не требуется отправка сообщения по заказу №{self.order['number']} "
                                 f"со статусом: {self.status_notif}")
                     continue
-
-                await self.get_user_notif()  # Определяем менеджера для отправки уведомлений по позиции
+                try:
+                    await self.get_user_notif()  # Определяем менеджера для отправки уведомлений по позиции
+                except Exception as ex:
+                    logger.debug(ex)
 
                 # Получаем чаты отправки уведомлений
                 self.get_chat_id_for_notif()
