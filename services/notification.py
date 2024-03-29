@@ -140,8 +140,8 @@ class Notif:
         Асинхронно получает идентификатор пользователя для уведомлений на основе текущего заказа.
         """
         if self.order['managerId'] != '0':
-            user_id = list(filter(lambda v: v['id'] == self.order['managerId'], self.list_managers))
-            self.user_notif['id'] = user_id[0]['contractorId']
+            user_id = list(filter(lambda v: str(v['id']) == str(self.order['managerId']), self.list_managers))
+            self.user_notif['id'] = str(user_id[0]['contractorId'])
             self.user_notif['full_name'] = self.order['userName']
             self.user_notif['type_order'] = 'user'
         else:
@@ -173,10 +173,8 @@ class Notif:
                     logger.info(f"Не требуется отправка сообщения по заказу №{self.order['number']} "
                                 f"со статусом: {self.status_notif}")
                     continue
-                try:
-                    await self.get_user_notif()  # Определяем менеджера для отправки уведомлений по позиции
-                except Exception as ex:
-                    logger.debug(ex)
+
+                await self.get_user_notif()  # Определяем менеджера для отправки уведомлений по позиции
 
                 # Получаем чаты отправки уведомлений
                 self.get_chat_id_for_notif()
