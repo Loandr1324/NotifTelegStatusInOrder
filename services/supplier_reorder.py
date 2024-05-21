@@ -195,14 +195,18 @@ class ReOrder:
     async def send_orders_to_supplier(self):
         """Отправка заказов поставщику и запись ошибок при отправке"""
         for supplier in self.positions_reorder_suppliers:
-            logger.info(f" Оформляем заказы пакетами по поставщику: {supplier}")
-            result = await self.work_abcp.create_order_supplier(
-                order_params=self.positions_reorder_suppliers[supplier]['orderParams'],
-                positions=self.positions_reorder_suppliers[supplier]['position_for_order']
-            )
+            logger.info(f"Оформляем заказы пакетами по поставщику: {supplier}")
+            positions = self.positions_reorder_suppliers[supplier]['position_for_order']
+            logger.info(f"Количество позиций для заказа: {len(positions)}")
+            # Дробим количество позиций по 20 и оформляем заказы
+            for i in range(0, len(positions), 20):
+                result = await self.work_abcp.create_order_supplier(
+                    order_params=self.positions_reorder_suppliers[supplier]['orderParams'],
+                    positions=positions[i:i + 20]
+                )
 
-            # Проверяем результат на ошибки
-            self.check_result_errors(result, supplier)
+                # Проверяем результат на ошибки
+                self.check_result_errors(result, supplier)
 
     def add_error_data(self, text_error, position, supplier):
         """Добавляем данные по позициям в базу данных об ошибках"""
