@@ -234,11 +234,24 @@ class ReOrder:
         for position in self.positions_reorder_suppliers[supplier]['positions']:
             self.add_error_data(text_error, position, supplier)
 
+    # def add_error_data_for_position(self, result, supplier):
+    #     """Добавляем данные об ошибки в массив для записи в базу данных по каждой поставщика"""
+    #     for res_order in result:
+    #         if "с ошибкой" in res_order['number']:
+    #             for res_pos in res_order['positions']:
+    #                 for i, position in enumerate(self.positions_reorder_suppliers[supplier]['positions']):
+    #                     if res_pos['reference'] == position['id']:
+    #                         self.add_error_data(res_pos['status'], position, supplier)
+    #         else:
+    #             logger.info(f"Оформлен заказ поставщику по части позиций: {supplier}")
+    #             logger.info(f"Результат оформления: {res_order}") TODO Удалить после удачных тестов
+
     def add_error_data_for_position(self, result, supplier):
-        """Добавляем данные об ошибки в массив для записи в базу данных по каждой поставщика"""
+        """Добавляем данные об ошибке в массив для записи в базу данных по каждому поставщику"""
         for res_order in result:
-            if "с ошибкой" in res_order['number']:
-                for res_pos in res_order['positions']:
+            unconfirmed_positions = [pos for pos in res_order['positions'] if not pos['confirmSend']]
+            if unconfirmed_positions:
+                for res_pos in unconfirmed_positions:
                     for i, position in enumerate(self.positions_reorder_suppliers[supplier]['positions']):
                         if res_pos['reference'] == position['id']:
                             self.add_error_data(res_pos['status'], position, supplier)
@@ -261,8 +274,13 @@ class ReOrder:
 
             self.add_error_data_for_supplier(result['errorMessage'], supplier)
 
-        elif isinstance(result, list) and any("с ошибкой" in res_order['number'] for res_order in result):
-            self.add_error_data_for_position(result, supplier)
+        # elif isinstance(result, list) and any("с ошибкой" in res_order['number'] for res_order in result):
+        #     self.add_error_data_for_position(result, supplier) TODO Удалить после удачных тестов
+        elif isinstance(result, list):
+            for res_order in result:
+                unconfirmed_positions = [pos for pos in res_order['positions'] if not pos['confirmSend']]
+                if unconfirmed_positions:
+                    self.add_error_data_for_position(result, supplier)
         else:
             logger.info(f"Оформлен заказ поставщику: {supplier}")
             logger.info(f"Результат оформления: {result}")
