@@ -267,12 +267,16 @@ class ReOrder:
 
         elif 'errorMessage' in result:
             # Получаем текстовое описание ошибки
-            try:
-                result['errorMessage'] = result['errorMessage'].args[0]['errorMessage']
-            except (TypeError, KeyError):
-                logger.error(f"Не удалось получить значения ошибки по ключу 'errorMessage'")
+            result_error = result.get('errorMessage', {}).get('args', [{}])[0].get('errorMessage')
+            if not result_error:
+                result_error = result.get('errorMessage', "Не удалось получить значения ошибки по ключу 'errorMessage'")
 
-            self.add_error_data_for_supplier(result['errorMessage'], supplier)
+                if result_error == "Не удалось получить значения ошибки по ключу 'errorMessage'":
+                    logger.error(f"Не удалось получить значения ошибки по ключу 'errorMessage'")
+                    logger.error(f"Т.к. не нашли в результате ключ 'errorMessage' при оформлении "
+                                 f"заказа добавляем в лог полученный результат: {result=}")
+
+            self.add_error_data_for_supplier(result_error, supplier)
 
         # elif isinstance(result, list) and any("с ошибкой" in res_order['number'] for res_order in result):
         #     self.add_error_data_for_position(result, supplier) TODO Удалить после удачных тестов
