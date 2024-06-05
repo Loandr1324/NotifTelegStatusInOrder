@@ -170,8 +170,15 @@ class WorkGoogle:
 
         type_id = 'user_id' if type_search == 'user' else 'manager_id'
 
-        user_notif = [v for v in self.users_notif if
-                      v['task_id'] == task_id and v['status_id'] == status_id and v[type_id] == search_id]
+        if status_id == '144926':
+            user_notif = [v for v in self.users_notif if
+                          v['task_id'] == task_id and v['status_id'] == status_id and search_id in v[type_id]]
+            if not user_notif:
+                return []
+
+        else:
+            user_notif = [v for v in self.users_notif if
+                          v['task_id'] == task_id and v['status_id'] == status_id and v[type_id] == search_id]
 
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
