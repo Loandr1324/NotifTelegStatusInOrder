@@ -32,12 +32,16 @@ class NotifTelegram:
                 row1 = "🔴 <b>Отказ поставщика (клиент)</b>\n\n"
             elif user_notif['type_order'] == 'stock':
                 row1 = "🟡 <b>Отказ поставщика (склад)</b>\n\n"
+            elif user_notif['type_order'] == 'new_order':
+                row1 = "🟠 <b>Заказ ждёт команды на сборку</b>\n\n"
 
         elif user_notif['msg_type'] == 'secondary':
             if user_notif['type_order'] == 'user':
                 row1 = "🔴 <b>Отказ поставщика (клиент) (ПОВТОР)</b>\n\n"
             elif user_notif['type_order'] == 'stock':
                 row1 = "🟡 <b>Отказ поставщика (склад) (ПОВТОР)</b>\n\n"
+            elif user_notif['type_order'] == 'new_order':
+                row1 = "🟠 <b>Заказ ждёт команды на сборку (ПОВТОР)</b>\n\n"
 
         elif user_notif['msg_type'] == 'error_reorder':
             row1 = "❌ <b>Ошибка отправки заказа поставщику</b>\n\n"
@@ -46,16 +50,24 @@ class NotifTelegram:
         url_order = f'{url_cp_client}?page=orders&id_order={num_order}'
         row2 = f'<b>Заказ: </b><a href="{url_order}"><u>№ {num_order}</u></a>\n'
 
-        url_client_site = f'https://az23.ru/'
-        url_search = f'{url_client_site}search/{position["brand"]}/{position["number"]}'
-        row3 = f'<b>Позиция: </b><a href="{url_search}"><u>{position["brand"]} {position["number"]}</u></a>\n\n'
+        if user_notif['type_order'] == 'new_order':
+            row3, row4, row5 = '\n', '', ''
+        else:
+            url_client_site = f'https://az23.ru/'
+            url_search = f'{url_client_site}search/{position["brand"]}/{position["number"]}'
+            row3 = f'<b>Позиция: </b><a href="{url_search}"><u>{position["brand"]} {position["number"]}</u></a>\n\n'
 
-        row4 = f'<code>{position["description"]}</code>\n'
-        row5 = f'<b>Поставщик: </b><code>{position["distributorName"]}</code>\n\n'
+            row4 = f'<code>{position["description"]}</code>\n'
+            row5 = f'<b>Поставщик: </b><code>{position["distributorName"]}</code>\n\n'
 
         if user_notif['msg_type'] == 'error_reorder':
             row6 = f'<b>Описание ошибки: </b><code>{position["error"]}</code>\n'
             row7 = f'<i>{position["userName"]}</i>'
+        elif user_notif['type_order'] == 'new_order':
+            row6 = f'<b>Клиент: </b>\n'
+            row7 = (f'<i>{user_notif["full_name"]}</i>\n\n '
+                    f'⚠️ <i>Необходимо перейти в заказ и позициям '
+                    f'<b>из наличия</b> установить статус "Есть в наличии"</i>')
         else:
             row6 = f'<b>Клиент: </b>\n'
             row7 = f'<i>{user_notif["full_name"]}</i>'
