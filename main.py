@@ -35,7 +35,7 @@ def main() -> None:
     for task in tasks:
         if task['task_id'] == '1' and task['can_run_task']:
             try:
-                logger.info(f"Запускаем выполнение задачи по отправке уведомлений")
+                logger.info(f"Запускаем выполнение задачи по {task['task_name']}")
                 notif = Notif(
                     task_id=task['task_id'],
                     status_notif=task['status_id'],
@@ -52,8 +52,9 @@ def main() -> None:
                 )
             except Exception as e:
                 logger.error(f"Произошла ошибка при выполнении задачи по отправке уведомлений {e}")
+
         elif task['task_id'] == '2' and task['can_run_task']:
-            logger.warning(f"Запускаем выполнение задачи по отправке Заказов поставщикам")
+            logger.info(f"Запускаем выполнение задачи по {task['task_name']}")
             sup_reorder = ReOrder(
                 task_id=task['task_id'],
                 status_reorder=task['status_id'],
@@ -70,6 +71,22 @@ def main() -> None:
                 value=date_now.strftime('%Y-%m-%d %H:%M:%S')
             )
 
+        elif task['task_id'] == '6' and task['can_run_task']:
+            logger.warning(f"Запускаем выполнение задачи по {task['task_name']}")
+            notif = Notif(
+                task_id=task['task_id'],
+                status_notif=task['status_id'],
+                repeat_notification=task['repeat'],
+                date_start=task['date_start']
+            )
+            notif.start_notif()
+
+            # Добавляем запись о последнем запуске задачи в Google Sheets
+            date_now = dt.now()
+            WorkGoogle().set_tasks_last_start(
+                row=task['row_task_on_sheet'],
+                value=date_now.strftime('%Y-%m-%d %H:%M:%S')
+            )
         elif not task['can_run_task']:
             logger.info(f"Интервал времени для запуска задачи №{task['task_id']} - \"{task['task_name']}\" не прошёл.")
         else:
