@@ -77,7 +77,8 @@ def main() -> None:
                 task_id=task['task_id'],
                 status_notif=task['status_id'],
                 repeat_notification=task['repeat'],
-                date_start=task['date_start']
+                date_start=task['date_start'],
+                allowed_suppliers=task['allowed_suppliers']
             )
             notif.start_notif()
 
