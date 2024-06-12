@@ -82,6 +82,7 @@ class Notif:
             task_id = self.task_id,
             status_id=self.status_notif,
             search_id=self.user_notif['id'],
+            client_id=self.user_notif['client_id'],
             type_search=self.user_notif['type_notif']
         )
 
@@ -141,16 +142,11 @@ class Notif:
         """
         Асинхронно получает идентификатор пользователя для уведомлений на основе текущего заказа.
         """
-        # if self.status_notif == '144926':
-        #     self.user_notif['id'] = self.order['userId']
-        #     self.user_notif['full_name'] = self.order['userName']
-        #     self.user_notif['type_order'] = 'new_order'
-        #     self.user_notif['type_notif'] = 'user'
-
         if self.order['managerId'] != '0':
             # user_id = list(filter(lambda v: str(v['id']) == str(self.order['managerId']), self.list_managers))
             # self.user_notif['id'] = str(user_id[0]['contractorId'])
             self.user_notif['id'] = self.order['managerId']
+            self.user_notif['client_id'] = self.order['userId']
             self.user_notif['full_name'] = self.order['userName']
             self.user_notif['type_order'] = 'user'
             self.user_notif['type_notif'] = 'manager_id'
@@ -158,9 +154,10 @@ class Notif:
         else:
             # user_id = list(filter(lambda v: v['contractorId'] == self.order['userId'], self.list_managers))
             self.user_notif['id'] = self.order['userId']
+            self.user_notif['client_id'] = self.order['userId']
             self.user_notif['full_name'] = self.order['userName']
             self.user_notif['type_order'] = 'stock'
-            self.user_notif['type_notif'] = 'user'
+            self.user_notif['type_notif'] = 'user_id'
 
         if self.status_notif == '144926' and self.task_id == '6':
             self.user_notif['type_order'] = 'new_order'
@@ -172,8 +169,8 @@ class Notif:
         # получаем список заказов по статусу для уведомлений
         orders = await self.get_order_by_status()
 
-        logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
-        await self.staff_notif()
+        # logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
+        # await self.staff_notif()
 
         logger.info(f"Считываем из Google таблицы соответствия менеджеров и чатов для уведомлений")
         self.work_google.get_users_notif()
