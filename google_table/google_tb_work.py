@@ -3,7 +3,7 @@ import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-from config import AUTH_GOOGLE
+from config import AUTH_GOOGLE, CHAT_DEFAULT
 from loguru import logger
 import datetime as dt
 
@@ -186,7 +186,7 @@ class WorkGoogle:
 
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
-        return chats_id
+        return chats_id + CHAT_DEFAULT
 
     def get_supplier_params(self) -> list[dict]:
         """
