@@ -99,7 +99,7 @@ class WorkGoogle:
         setting = self._rw_google.read_sheet(0)
         # values = self.read_sheet(AUTH_GOOGLE['KEY_WORKBOOK'], 0)
         params_head = ["work_open", "work_close", "auth_api"]
-        return dict(zip(params_head,setting[1:][0]))
+        return dict(zip(params_head, setting[1:][0]))
 
     def get_tasks(self) -> list[dict]:
         """
@@ -161,24 +161,31 @@ class WorkGoogle:
             params_user_notif = dict(zip(params_head, val))
             self.users_notif += [params_user_notif]
 
-    def get_chat_id_notif(self, task_id: str, status_id: str, search_id: str, type_search: str = 'user') -> list:
+    def get_chat_id_notif(self,
+                          task_id: str = '1',
+                          status_id: str = '144931',
+                          search_id: str = '',
+                          client_id: str = '',
+                          type_search: str = 'user') -> list:
         """
         Получаем список идентификаторов чатов телеграмм
         :return: list[str]
         """
-        task_id = task_id or '1'
-        status_id = status_id or '144931'
-
-        type_id = 'user_id' if type_search == 'user' else 'manager_id'
-
         user_notif = [v for v in self.users_notif if
-                      v['task_id'] == task_id and v['status_id'] == status_id and search_id in v[type_id]]
+                      v['task_id'] == task_id
+                      and v['status_id'] == status_id
+                      and search_id in v['manager_id']
+                      and client_id in v['user_id']
+                      ]
+        if not user_notif:
+
+            user_notif = [v for v in self.users_notif if
+                          v['task_id'] == task_id and v['status_id'] == status_id and search_id in v[type_search]]
         if not user_notif:
             return []
 
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
-        # chats_id = ['-1001817291153']  # TODO Удалить после тестов
         return chats_id
 
     def get_supplier_params(self) -> list[dict]:
