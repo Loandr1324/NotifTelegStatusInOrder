@@ -212,11 +212,13 @@ class ReOrder:
         """Добавляем данные по позициям в базу данных об ошибках"""
         if int(position['count_error']) < self.retry_count - 1:
             count_error = str(int(position['count_error']) + 1)
-
+            logger.warning(f"Есть ошибка при заказе, но не последняя по позиции: {position}")
+            logger.warning(f"Уведомление пока не отправляем")
         else:
             count_error = str(self.retry_count)
             # Добавляем позиции в список для уведомлений менеджерам
             position['error'] = text_error
+            logger.error(f"Последняя ошибка в заказе. Начинаем отправку уведомления по позиции {position}")
             self.error_positions_notify.append(position)
 
         # Заполняем данные об ошибке для дальнейшей записи в БД
