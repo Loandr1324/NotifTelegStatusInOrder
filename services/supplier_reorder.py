@@ -263,6 +263,7 @@ class ReOrder:
         """Проверяем результат полученный по API на ошибки"""
 
         if not result:
+            logger.error(f"Нет результатов при оформлении заказа")
             self.add_error_data_for_supplier("Нет результатов при оформлении заказа", supplier)
 
         elif 'errorMessage' in result:
@@ -276,6 +277,7 @@ class ReOrder:
                     logger.error(f"Т.к. не нашли в результате ключ 'errorMessage' при оформлении "
                                  f"заказа добавляем в лог полученный результат: {result=}")
 
+            logger.error(f"Добавляем запись в БД об ошибке: {result_error}")
             self.add_error_data_for_supplier(result_error, supplier)
 
         # elif isinstance(result, list) and any("с ошибкой" in res_order['number'] for res_order in result):
@@ -284,6 +286,7 @@ class ReOrder:
             for res_order in result:
                 unconfirmed_positions = [pos for pos in res_order['positions'] if not pos['confirmSend']]
                 if unconfirmed_positions:
+                    logger.error(f"Добавляем запись в БД об ошибке: {unconfirmed_positions}")
                     self.add_error_data_for_position(result, supplier)
         else:
             logger.info(f"Оформлен заказ поставщику: {supplier}")
