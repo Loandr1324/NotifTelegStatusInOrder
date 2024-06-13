@@ -308,7 +308,7 @@ class ReOrder:
         for position in self.error_positions_notify:
             # Получаем чаты для уведомлений по позиции
             user_notif = {'chats_id': self.work_google.get_chat_id_notif(
-                task_id='', status_id='', search_id=position['userId'], type_search=position['type_search_user']
+                search_id=position['userId'], type_search=position['type_search_user']
             )}
             logger.info(f"Отправляем уведомление об ошибке при оформление позиции у поставщика менеджеру")
             # Создаём текст сообщения согласно статуса и заказа с позициями
