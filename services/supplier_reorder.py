@@ -371,6 +371,7 @@ class ReOrder:
 
         # Отправляем данные об ошибках в телеграм
         if self.error_positions_notify:
+            logger.info(f"Начинаем отправку сообщений в телеграмм")
             self.send_error_message()
 
         await self.work_abcp.api_abcp.close()
