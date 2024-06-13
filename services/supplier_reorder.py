@@ -290,6 +290,9 @@ class ReOrder:
                 if unconfirmed_positions:
                     logger.error(f"Добавляем запись в БД об ошибке: {unconfirmed_positions}")
                     self.add_error_data_for_position(result, supplier)
+                else:
+                    logger.info(f"Оформлен заказ поставщику: {supplier}")
+                    logger.info(f"Результат оформления: {res_order}")
         else:
             logger.info(f"Оформлен заказ поставщику: {supplier}")
             logger.info(f"Результат оформления: {result}")
