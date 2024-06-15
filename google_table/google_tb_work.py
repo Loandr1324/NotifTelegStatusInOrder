@@ -119,13 +119,16 @@ class WorkGoogle:
             "last_start" - последний старт задачи
             "temp_not1" - Шаблон первичного уведомления
             "temp_not2" - Шаблон повторного уведомления
-            "allowed_suppliers" - Разрешённые индентификаторы поставщиков
+            "allowed_suppliers" - Разрешённые идентификаторы поставщиков
+            "type_notif" - Тип уведомления
+            "select_alg" - Алгоритм работы
             "row_task_on_sheet" - Номер строки задачи на листе Google sheets
             ]
         """
         params_head = [
             "task_id", "task_name", "time_start", "time_finish", "task_interval", "status_name", "status_id",
-            "date_start", "repeat", "retry_count", "last_start", "temp_not1", "temp_not2", "allowed_suppliers"
+            "date_start", "repeat", "retry_count", "last_start", "temp_not1", "temp_not2", "allowed_suppliers",
+            "type_notif", "select_alg"
         ]
         notif = []
         i = 2  # Первоначальный Номер строки считываемой задачи
@@ -166,7 +169,7 @@ class WorkGoogle:
                           status_id: str = '144931',
                           search_id: str = '',
                           client_id: str = '',
-                          type_search: str = 'user') -> list:
+                          type_search: str = 'user_id') -> list:
         """
         Получаем список идентификаторов чатов телеграмм
         :return: list[str]
@@ -290,7 +293,7 @@ class WorkGoogle:
         :param date_time: Строка с датой в формате '%Y-%m-%d %H:%M:%S'
         :return: Дата в формате datetime.datetime(2023, 11, 1, 0, 0, 0)
         """
-        return datetime.datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S')
+        return datetime.datetime.strptime(date_time, '%Y-%m-%d %H:%M:%S') if date_time else "2024-01-01 00:00:01"
 
     @staticmethod
     def convert_yes_no_to_bool(value: str) -> bool:
