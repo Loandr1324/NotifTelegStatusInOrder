@@ -12,7 +12,17 @@ api_abcp = Abcp(host, login, password)
 
 
 class Notif:
-    def __init__(self, task_id, status_notif, repeat_notification, date_start, allowed_suppliers=''):
+    def __init__(
+            self,
+            task_id,
+            status_notif,
+            repeat_notification,
+            date_start,
+            text_message='',
+            text_message_repeat='',
+            allowed_suppliers='',
+            type_notif='',
+    ):
         self.user_notif = dict.fromkeys(['id', 'full_name', 'type_order', 'msg_type', 'chats_id'])
         self.order = None
         self.product = None
@@ -28,6 +38,9 @@ class Notif:
         self.work_google = WorkGoogle()
         self.date_start = date_start
         self.allowed_suppliers = allowed_suppliers
+        self.text_message = text_message if text_message else "Не задан текст первого сообщения"
+        self.text_message_repeat = text_message_repeat if text_message_repeat else "Не задан текст повторного сообщения"
+        self.type_notif = type_notif if type_notif else "По позициям"
 
     async def staff_notif(self):
         """
@@ -66,8 +79,16 @@ class Notif:
         :raises ValueError: Если сообщение для передаваемого статуса не определено.
         """
         try:
-            self.telegram.message_sup_order_cancel(
-                self.order['number'], self.product, self.user_notif
+            # self.telegram.message_sup_order_cancel(
+            #     self.order['number'], self.product, self.user_notif
+            # ) TODO Удалить после тестов
+            if self.user_notif['msg_type'] == "secondary":
+                text_message = self.text_message_repeat
+            else:
+                text_message = self.text_message
+
+            self.telegram.create_message_notif(
+                self.order['number'], self.product, self.user_notif, text_message
             )
         except Exception as e:
             logger.error(f"Ошибка при создании сообщения: {e}")
@@ -105,7 +126,8 @@ class Notif:
         """
         # Получаем из БД отправленные уведомления по товару
         self.db_product_is_notif = self.work_csv.filter(
-            type_filter='notif_cancel',
+            type_filter='notif',
+            id_task=self.task_id,
             id_order=self.order['number'],
             id_position=self.product['id'],
             id_status=self.status_notif
@@ -114,7 +136,8 @@ class Notif:
     def add_to_data_notif_position(self):
         """Добавляем данные по позиции в список отправленных уведомлений"""
         self.work_csv.add_to_data(
-            type_data = 'notif_cancel',
+            type_data='notif',
+            id_task=self.task_id,
             id_status=self.status_notif,
             id_order=self.order['number'],
             id_position=self.product['id'],

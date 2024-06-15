@@ -52,9 +52,10 @@ class WorkCSV:
         """
         Фильтруем данные из файла csv согласно заданных параметров
         """
-        if kwargs['type_filter'] == 'notif_cancel':
+        if kwargs['type_filter'] == 'notif':
             return list(filter(
                 lambda v: v["id_status"] == kwargs['id_status'] and
+                        v["id_task"] == kwargs['id_task'] and
                         v["id_order"] == kwargs['id_order'] and
                         v["id_position"] == kwargs['id_position'],
                         self._data))
@@ -72,8 +73,9 @@ class WorkCSV:
 
     def add_to_data(self, **kwargs):
         """Добавляем данные по позиции в список"""
-        if kwargs['type_data'] == 'notif_cancel':
+        if kwargs['type_data'] == 'notif':
             self._new_data += [{
+                'id_task': kwargs['id_task'],
                 'id_status': kwargs['id_status'],
                 'id_order': kwargs['id_order'],
                 'id_position': kwargs['id_position'],
