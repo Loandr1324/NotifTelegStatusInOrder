@@ -270,7 +270,8 @@ class ReOrder:
 
         elif 'errorMessage' in result:
             # Получаем текстовое описание ошибки
-            result_error = result.get('errorMessage', {}).args[0].get('errorMessage')
+            # result_error = result.get('errorMessage', {}).args[0].get('errorMessage')
+            result_error = result['errorMessage'].args[0]  # Это строка str
             if not result_error:
                 result_error = result.get('errorMessage', "Не удалось получить значения ошибки по ключу 'errorMessage'")
 
