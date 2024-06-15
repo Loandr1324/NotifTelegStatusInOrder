@@ -91,25 +91,26 @@ class NotifTelegram:
             'keyboard: клавиатура к сообщению: str'
             };
         """
-        temp_str = text_message
+        icon_user_stock = '🔴' if user_notif['type_order'] == 'user' else '🟡'
+        user_stock = 'клиент' if user_notif['type_order'] == 'user' else 'склад'
+
         # Значения переменных
         data = {
-            "order_number": "12345",
-            "domain_pu": "example.com",
-            "article": "A123",
-            "brand": "BrandX",
-            "shop_domain": "shop.com",
-            "description": "Описание детали",
-            "supplier_name": "ПоставщикX",
-            "client_name": "Иван Иванов",
-            "extra_key1": "Extra Value 1",  # Лишний ключ
-            "extra_key2": "Extra Value 2"  # Лишний ключ
+            "icon_user_stock": icon_user_stock,
+            "user_stock": user_stock,
+            "num_order": num_order,
+            "domain_cp": "cpv1.pro",
+            "article": position.get("number", "Нет номера позиции"),
+            "brand": position.get("brand", "Нет бренда"),
+            "shop_domain": "az23.ru",
+            "description": position.get("description", "Нет описания позиции"),
+            "supplier": position.get("distributorName", "Нет имени поставщика"),
+            "error": position.get("error", "Нет информации об ошибке"),
+            "full_name": user_notif.get("full_name", "Нет имени")
         }
 
         # Замена значений в строке
-        formatted_str = temp_str.format(**data)
-
-
+        self.message['text'] = text_message.format(**data)
 
     def send_massage_chat(self, chat_id: str) -> bool:
         """Отправляем полученное сообщение в чат бот"""
@@ -133,41 +134,3 @@ class NotifTelegram:
             logger.error('Отправка уведомления в телеграм была неудачна. Описание ошибки:')
             logger.error(e)
             return False
-
-    def test(self):
-        temp_str = """
-        🔴/🟡 Отказ поставщика (клиент/склад)
-
-        Заказ: № {order_number} (https://{domain_pu}/?page=orders&id_order={order_number})
-        Позиция: {article} {brand} (https://{shop_domain}/search/{brand}/{article})
-
-        {description}
-        Поставщик: {supplier_name}
-
-        Клиент:
-        {client_name}
-        """
-
-        # Значения переменных
-        data = {
-            "order_number": "12345",
-            "domain_cp": "example.com",
-            "article": "A123",
-            "brand": "BrandX",
-            "shop_domain": "shop.com",
-            "description": "Описание детали",
-            "supplier_name": "ПоставщикX",
-            "client_name": "Иван Иванов",
-            "manager_name": "Продавцов продавец",  # Лишний ключ
-            "extra_key2": "Extra Value 2"  # Лишний ключ
-        }
-
-        # Замена значений в строке
-        formatted_str = temp_str.format(**data)
-
-        print(formatted_str)
-
-
-if __name__ == "__main__":
-    a = NotifTelegram()
-    a.test()
