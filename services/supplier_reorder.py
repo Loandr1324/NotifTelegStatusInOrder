@@ -133,11 +133,11 @@ class ReOrder:
             if order['managerId'] != '0':
                 user_id = self.allowed_managers[order['managerId']][0]
                 user_name = self.allowed_managers[order['managerId']][1]
-                type_search = 'manager'
+                type_search = 'manager_id'
             else:
                 user_id = order['userId']
                 user_name = order['userName'][10:]
-                type_search = 'user'
+                type_search = 'user_id'
 
             # Подставляем данные для заказа по позициям
             for position in order['positions']:
