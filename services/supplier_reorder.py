@@ -6,6 +6,7 @@ from data_notif.csv_work import WorkCSV
 from loguru import logger
 from config import FILENAME_REORDER_ERROR, OUR_STOCK
 from google_table.google_tb_work import WorkGoogle
+import ast  # библиотека для преобразования строки в словарь
 
 
 class ReOrder:
@@ -271,7 +272,14 @@ class ReOrder:
         elif 'errorMessage' in result:
             # Получаем текстовое описание ошибки
             # result_error = result.get('errorMessage', {}).args[0].get('errorMessage')
-            result_error = result['errorMessage'].args[0]  # Это строка str. Требуется доработка
+            result_error = []
+            if 'errorMessage' in result:
+                result_error = result['errorMessage'].args[0]
+
+                if isinstance(result_error, str):
+                    result_error = ast.literal_eval(result_error)  # Преобразуем строку в словарь
+                result_error = result_error.get('errorMessage')
+
             if not result_error:
                 result_error = result.get('errorMessage', "Не удалось получить значения ошибки по ключу 'errorMessage'")
 
