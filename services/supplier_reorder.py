@@ -276,9 +276,9 @@ class ReOrder:
             if 'errorMessage' in result:
                 result_error = result['errorMessage'].args[0]
 
-                if isinstance(result_error, str):
-                    result_error = ast.literal_eval(result_error)  # Преобразуем строку в словарь
-                result_error = result_error.get('errorMessage')
+                # if isinstance(result_error, str):
+                #     result_error = ast.literal_eval(result_error)  # Преобразуем строку в словарь
+                # result_error = result_error.get('errorMessage')
 
             if not result_error:
                 result_error = result.get('errorMessage', "Не удалось получить значения ошибки по ключу 'errorMessage'")
