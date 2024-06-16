@@ -196,8 +196,7 @@ class WorkGoogle:
 
         logger.info(user_notif[0]['tel_chat_id'])
         chats_id = user_notif[0]['tel_chat_id'].replace(' ', '').split(',')
-        # return chats_id + CHAT_DEFAULT
-        return CHAT_DEFAULT  # TODO Удалить после тестов
+        return chats_id + CHAT_DEFAULT
 
     def get_supplier_params(self) -> list[dict]:
         """
