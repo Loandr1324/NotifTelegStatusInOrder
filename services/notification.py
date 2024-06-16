@@ -161,8 +161,8 @@ class Notif:
             self.user_notif['msg_type'] = "secondary"
             result = False
 
-        logger.debug(f"Нашли позиции с этим статусом и задачей: {self.db_product_is_notif=}")
-        logger.debug(f"Возвращаем результат поиска позиции: {result}")
+        # logger.debug(f"Нашли позиции с этим статусом и задачей: {self.db_product_is_notif=}")
+        # logger.debug(f"Возвращаем результат поиска позиции: {result}")
 
         return result
 
@@ -328,17 +328,17 @@ class Notif:
         )
 
         for self.order in orders['items']:
-            logger.debug(f"Обрабатываем позиции заказа №{self.order['number']}")
+            # logger.debug(f"Обрабатываем позиции заказа №{self.order['number']}")
             # Выбираем позиции с нужным статусом по разрешённым поставщикам
             products_notif = list(filter(
-                lambda v: v['statusCode'] == self.status_notif and
-                          v['distributorId'] in self.allowed_suppliers if self.allowed_suppliers
-                else v['distributorId'],
+                lambda v: v['statusCode'] == self.status_notif and v['distributorId'] in (
+                    self.allowed_suppliers if self.allowed_suppliers else v['distributorId']
+                ),
                 self.order['positions']))
-            logger.debug(f"Количество позиций соответствующих статусу и поставщику: {len(products_notif)}")
+            # logger.debug(f"Количество позиций соответствующих статусу и поставщику: {len(products_notif)}")
 
             if not products_notif:
-                logger.debug(f"Нет позиций для уведомления по заказу №{self.order} переходим к следующему заказу")
+                # logger.debug(f"Нет позиций для уведомления по заказу №{self.order} переходим к следующему заказу")
                 continue
 
             if self.type_notif.lower() == "по позициям":
