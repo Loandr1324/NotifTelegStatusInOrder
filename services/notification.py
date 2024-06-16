@@ -357,8 +357,8 @@ class Notif:
         await api_abcp.close()
 
     def start_notif(self):
-        # asyncio.run(self.send_notif_by_status())
-        if self.status_notif == '144926':  # TODO Удалить после тестов
-            asyncio.run(self.send_notif_by_new_order())
-        else:
-            asyncio.run(self.send_notif_by_status_old())
+        asyncio.run(self.send_notif_by_status())
+        # if self.status_notif == '144926':  # TODO Удалить после тестов
+        #     asyncio.run(self.send_notif_by_new_order())
+        # else:
+        #     asyncio.run(self.send_notif_by_status_old())
