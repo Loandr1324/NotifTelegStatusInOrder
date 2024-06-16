@@ -151,6 +151,7 @@ class Notif:
         """
         result = True
         self.get_notif_db()
+
         # Если нет в базе уведомлений товаров и заказов
         if not self.db_product_is_notif:
             # Отправляем уведомления в телеграм и получаем результат
@@ -159,6 +160,10 @@ class Notif:
         elif self.db_product_is_notif and self.repeat_notification:
             self.user_notif['msg_type'] = "secondary"
             result = False
+
+        logger.debug(f"Нашли позиции с этим статусом и задачей: {self.db_product_is_notif=}")
+        logger.debug(f"Возвращаем результат поиска позиции: {result}")
+
         return result
 
     async def get_user_notif(self):
@@ -330,6 +335,7 @@ class Notif:
                           v['distributorId'] in self.allowed_suppliers if self.allowed_suppliers
                 else v['distributorId'],
                 self.order['positions']))
+            logger.debug(f"Количество позиций соответствующих статусу и поставщику: {len(products_notif)}")
 
             if not products_notif:
                 logger.debug(f"Нет позиций для уведомления по заказу №{self.order} переходим к следующему заказу")
@@ -357,8 +363,8 @@ class Notif:
         await api_abcp.close()
 
     def start_notif(self):
-        # asyncio.run(self.send_notif_by_status())
-        if self.status_notif == '144926':  # TODO Удалить после тестов
-            asyncio.run(self.send_notif_by_new_order())
-        else:
-            asyncio.run(self.send_notif_by_status_old())
+        asyncio.run(self.send_notif_by_status())
+        # if self.status_notif == '144926':  # TODO Удалить после тестов
+        #     asyncio.run(self.send_notif_by_new_order())
+        # else:
+        #     asyncio.run(self.send_notif_by_status_old())
