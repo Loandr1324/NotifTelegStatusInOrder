@@ -174,16 +174,23 @@ class WorkGoogle:
         Получаем список идентификаторов чатов телеграмм
         :return: list[str]
         """
+        # Проверяем есть ли чат по соответствию менеджера и клиента
         user_notif = [v for v in self.users_notif if
                       v['task_id'] == task_id
                       and v['status_id'] == status_id
                       and search_id in v['manager_id']
                       and client_id in v['user_id']
                       ]
+        # Если нет, то проверяем по типу поиска переданного в метод
         if not user_notif:
-
             user_notif = [v for v in self.users_notif if
                           v['task_id'] == task_id and v['status_id'] == status_id and search_id in v[type_search]]
+
+        # Если нет, то проверяем по идентификатору клиента
+        if not user_notif:
+            user_notif = [v for v in self.users_notif if
+                          v['task_id'] == task_id and v['status_id'] == status_id and client_id in v['user_id']]
+
         if not user_notif:
             return []
 
