@@ -13,7 +13,7 @@ from loguru import logger
 logger.add(FILE_NAME_LOG,
            format="{time:DD/MM/YY HH:mm:ss} - {file} - {level} - {message}",
            level="INFO",
-           rotation="1 day",
+           rotation="00:00",
            compression="zip")
 
 
