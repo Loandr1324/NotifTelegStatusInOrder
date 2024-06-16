@@ -63,7 +63,8 @@ def main() -> None:
                 status_reorder=task['status_id'],
                 # repeat_notification=task['repeat'],
                 date_start=task['date_start'],
-                retry_count=task['retry_count']
+                retry_count=task['retry_count'],
+                text_message=task['temp_not1'],
             )
             sup_reorder.supplier_reorder()
 

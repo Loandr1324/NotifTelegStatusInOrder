@@ -10,7 +10,7 @@ import re
 
 
 class ReOrder:
-    def __init__(self, task_id, status_reorder, date_start, retry_count):
+    def __init__(self, task_id, status_reorder, date_start, retry_count, text_message):
         self.work_abcp: WorkABCP = WorkABCP()
         self.work_google = WorkGoogle()
         self.work_csv_error = WorkCSV(FILENAME_REORDER_ERROR)
@@ -29,6 +29,7 @@ class ReOrder:
         self.reorder_error = {}
         self.reorder_by_item_suppliers = []
         self.error_positions_notify = []
+        self.text_message = text_message
 
     def get_users_manager_for_order(self):
         """Получаем список менеджеров, для которых разрешёно оформлять заказы поставщикам из базы данных"""
@@ -331,8 +332,11 @@ class ReOrder:
             # self.create_message()
             user_notif['msg_type'] = 'error_reorder'
             try:
-                self.telegram.message_sup_order_cancel(
-                    position['order'], position, user_notif
+                # self.telegram.message_sup_order_cancel(  # TODO Удалить после тестов
+                #     position['order'], position, user_notif
+                # )
+                self.telegram.create_message_notif(
+                    position['order'], position, user_notif, self.text_message
                 )
             except Exception as e:
                 logger.error(f"Ошибка при создании сообщения: {e}")
