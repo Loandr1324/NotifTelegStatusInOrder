@@ -185,95 +185,95 @@ class Notif:
         if self.status_notif == '144926' and self.task_id == '6':
             self.user_notif['type_order'] = 'new_order'
 
-    # async def send_notif_by_status_old(self):  # TODO Удалить после тестов
-    #     """
-    #     Асинхронно отправляет уведомления в Telegram в соответствии с текущим статусом уведомления.
-    #     """
-    #     # получаем список заказов по статусу для уведомлений
-    #     orders = await self.get_order_by_status()
-    #
-    #     # logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
-    #     # await self.staff_notif()
-    #
-    #     logger.info(f"Считываем из Google таблицы соответствия менеджеров и чатов для уведомлений")
-    #     self.work_google.get_users_notif()
-    #
-    #     for self.order in orders['items']:
-    #         logger.info('Обрабатываем позиции заказа №' + self.order['number'])
-    #         products_notif = list(filter(
-    #             lambda v: v['statusCode'] == self.status_notif, self.order['positions']))
-    #         for self.product in products_notif:
-    #             # Проверяем можно ли отправить уведомление по этому заказу
-    #             if self.check_last_notif_position():
-    #                 logger.info(f"Не требуется отправка сообщения по заказу №{self.order['number']} "
-    #                             f"со статусом: {self.status_notif}")
-    #                 continue
-    #
-    #             await self.get_user_notif()  # Определяем менеджера для отправки уведомлений по позиции
-    #
-    #             # Получаем чаты отправки уведомлений
-    #             self.get_chat_id_for_notif()
-    #             logger.info(f"Определили менеджера  и чат для отправки уведомления {self.user_notif}")
-    #
-    #             # Создаём текст сообщения согласно статуса и заказа с позициями
-    #             self.create_message()
-    #             # Отправляем сообщения по статусу
-    #             self.send_message_telegram()
-    #             logger.info(f"Сообщение отправлено по заказу №{self.order['number']} со статусом: {self.status_notif}")
-    #     self.work_csv.add_data_file()
-    #     await api_abcp.close()
-    #
-    # async def send_notif_by_new_order(self):
-    #     """
-    #     Асинхронно отправляет уведомления в Telegram в соответствии с текущим статусом уведомления.
-    #     """
-    #     # получаем список заказов по статусу для уведомлений
-    #     orders = await self.get_order_by_status()
-    #
-    #     # logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
-    #     # await self.staff_notif()
-    #
-    #     logger.info(f"Считываем из Google таблицы соответствия менеджеров и чатов для уведомлений")
-    #     self.work_google.get_users_notif()
-    #
-    #     self.allowed_suppliers = '' if self.allowed_suppliers == "*" else self.allowed_suppliers
-    #
-    #     for self.order in orders['items']:
-    #         logger.info('Обрабатываем позиции заказа №' + self.order['number'])
-    #         products_notif = list(filter(
-    #             lambda v: v['statusCode'] == self.status_notif and
-    #                       v['distributorId'] in self.allowed_suppliers if self.allowed_suppliers else v['distributorId'],
-    #             self.order['positions'])
-    #         )
-    #
-    #         # Проверяем можно ли отправить уведомление по этому заказу
-    #         self.product = {'id': ''}
-    #         if not products_notif or self.check_last_notif_position():
-    #             logger.info(f"Не требуется отправка сообщения по заказу №{self.order['number']} "
-    #                         f"со статусом: {self.status_notif}")
-    #             continue
-    #
-    #         await self.get_user_notif()  # Определяем тип менеджера отправки уведомлений по позиции
-    #
-    #         # Получаем чаты отправки уведомлений
-    #         self.get_chat_id_for_notif()
-    #
-    #         if self.user_notif['chats_id']:
-    #             logger.info(f"Определили менеджера  и чат для отправки уведомления {self.user_notif}")
-    #
-    #             # Создаём текст сообщения согласно статуса и заказа с позициями
-    #             self.create_message()
-    #             # Отправляем сообщения по статусу
-    #             self.send_message_telegram()
-    #             logger.info(
-    #                 f"Сообщение отправлено по заказу №{self.order['number']} со статусом: {self.status_notif}")
-    #         else:
-    #             logger.info(f"Нет чата для отправки сообщений клиенту: {self.order['userName']} "
-    #                         f"id: {self.order['userId']} по заказу №{self.order['number']}, "
-    #                         f"со статусом: {self.status_notif}")
-    #
-    #     self.work_csv.add_data_file()
-    #     await api_abcp.close()
+    async def send_notif_by_status_old(self):  # TODO Удалить после тестов
+        """
+        Асинхронно отправляет уведомления в Telegram в соответствии с текущим статусом уведомления.
+        """
+        # получаем список заказов по статусу для уведомлений
+        orders = await self.get_order_by_status()
+
+        # logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
+        # await self.staff_notif()
+
+        logger.info(f"Считываем из Google таблицы соответствия менеджеров и чатов для уведомлений")
+        self.work_google.get_users_notif()
+
+        for self.order in orders['items']:
+            logger.info('Обрабатываем позиции заказа №' + self.order['number'])
+            products_notif = list(filter(
+                lambda v: v['statusCode'] == self.status_notif, self.order['positions']))
+            for self.product in products_notif:
+                # Проверяем можно ли отправить уведомление по этому заказу
+                if self.check_last_notif_position():
+                    logger.info(f"Не требуется отправка сообщения по заказу №{self.order['number']} "
+                                f"со статусом: {self.status_notif}")
+                    continue
+
+                await self.get_user_notif()  # Определяем менеджера для отправки уведомлений по позиции
+
+                # Получаем чаты отправки уведомлений
+                self.get_chat_id_for_notif()
+                logger.info(f"Определили менеджера  и чат для отправки уведомления {self.user_notif}")
+
+                # Создаём текст сообщения согласно статуса и заказа с позициями
+                self.create_message()
+                # Отправляем сообщения по статусу
+                self.send_message_telegram()
+                logger.info(f"Сообщение отправлено по заказу №{self.order['number']} со статусом: {self.status_notif}")
+        self.work_csv.add_data_file()
+        await api_abcp.close()
+
+    async def send_notif_by_new_order(self):
+        """
+        Асинхронно отправляет уведомления в Telegram в соответствии с текущим статусом уведомления.
+        """
+        # получаем список заказов по статусу для уведомлений
+        orders = await self.get_order_by_status()
+
+        # logger.info(f"Получаем актуальный список менеджеров с платформы ABCP")
+        # await self.staff_notif()
+
+        logger.info(f"Считываем из Google таблицы соответствия менеджеров и чатов для уведомлений")
+        self.work_google.get_users_notif()
+
+        self.allowed_suppliers = '' if self.allowed_suppliers == "*" else self.allowed_suppliers
+
+        for self.order in orders['items']:
+            logger.info('Обрабатываем позиции заказа №' + self.order['number'])
+            products_notif = list(filter(
+                lambda v: v['statusCode'] == self.status_notif and
+                          v['distributorId'] in self.allowed_suppliers if self.allowed_suppliers else v['distributorId'],
+                self.order['positions'])
+            )
+
+            # Проверяем можно ли отправить уведомление по этому заказу
+            self.product = {'id': ''}
+            if not products_notif or self.check_last_notif_position():
+                logger.info(f"Не требуется отправка сообщения по заказу №{self.order['number']} "
+                            f"со статусом: {self.status_notif}")
+                continue
+
+            await self.get_user_notif()  # Определяем тип менеджера отправки уведомлений по позиции
+
+            # Получаем чаты отправки уведомлений
+            self.get_chat_id_for_notif()
+
+            if self.user_notif['chats_id']:
+                logger.info(f"Определили менеджера  и чат для отправки уведомления {self.user_notif}")
+
+                # Создаём текст сообщения согласно статуса и заказа с позициями
+                self.create_message()
+                # Отправляем сообщения по статусу
+                self.send_message_telegram()
+                logger.info(
+                    f"Сообщение отправлено по заказу №{self.order['number']} со статусом: {self.status_notif}")
+            else:
+                logger.info(f"Нет чата для отправки сообщений клиенту: {self.order['userName']} "
+                            f"id: {self.order['userId']} по заказу №{self.order['number']}, "
+                            f"со статусом: {self.status_notif}")
+
+        self.work_csv.add_data_file()
+        await api_abcp.close()
 
     async def send_notif(self):
         """
@@ -357,8 +357,8 @@ class Notif:
         await api_abcp.close()
 
     def start_notif(self):
-        asyncio.run(self.send_notif_by_status())
-        # if self.status_notif == '144926':  # TODO Удалить после тестов
-        #     asyncio.run(self.send_notif_by_new_order())
-        # else:
-        #     asyncio.run(self.send_notif_by_status_old())
+        # asyncio.run(self.send_notif_by_status())
+        if self.status_notif == '144926':  # TODO Удалить после тестов
+            asyncio.run(self.send_notif_by_new_order())
+        else:
+            asyncio.run(self.send_notif_by_status_old())
