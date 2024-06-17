@@ -111,7 +111,19 @@ class NotifTelegram:
         }
 
         # Замена значений в строке
-        self.message['text'] = text_message.format(**data)
+        try:
+            text = text_message.format(**data)
+        except Exception as ex:
+            text = f"""<b>Не смогли подставить параметры в сообщение.</b>
+Возможно используются не корректные параметры.
+
+Существующие параметры:
+<code>{list(data)}</code>
+            
+<b>Ошибка(не корректный параметр):</b>
+<code>{ex}</code>"""
+
+        self.message['text'] = text
 
         # Создаём клавиатуру для сообщения
         # self.message['keyboard'] = InlineKeyboardMarkup(inline_keyboard=[
