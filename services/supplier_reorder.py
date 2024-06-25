@@ -1,5 +1,6 @@
 from telegram.send_teleg import *
 from datetime import datetime as dt
+from datetime import timedelta as td
 import asyncio
 from api_abcp.abcp_work import WorkABCP
 from data_notif.csv_work import WorkCSV
@@ -350,8 +351,10 @@ class ReOrder:
     async def reorder(self):
         """Оформляем заказы поставщикам по заданному статусу"""
         # Получаем список заказов для оформления заказов поставщикам
+        date_end = dt.now() - td(seconds=120)
+        logger.debug(f"Получаем заказы с {self.date_start} по {date_end}")
         self.orders = await self.work_abcp.get_order_by_status(
-            status=self.status_reorder, date_create_start=self.date_start
+            status=self.status_reorder, date_create_start=self.date_start, date_create_end=date_end
         )
 
         # Если заказов нет, то завершаем асинхронную сессию и возвращаемся
