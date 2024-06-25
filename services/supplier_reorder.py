@@ -352,7 +352,7 @@ class ReOrder:
         """Оформляем заказы поставщикам по заданному статусу"""
         # Получаем список заказов для оформления заказов поставщикам
         date_end = dt.now() - td(seconds=120)
-        logger.debug(f"Получаем заказы с {self.date_start} по {date_end}")
+        logger.info(f"Получаем заказы с {self.date_start} по {date_end}")
         self.orders = await self.work_abcp.get_order_by_status(
             status=self.status_reorder, date_create_start=self.date_start, date_create_end=date_end
         )
