@@ -350,7 +350,9 @@ class ReOrder:
     async def reorder(self):
         """Оформляем заказы поставщикам по заданному статусу"""
         # Получаем список заказов для оформления заказов поставщикам
-        self.orders = await self.work_abcp.get_order_by_status(status=self.status_reorder, date_create=self.date_start)
+        self.orders = await self.work_abcp.get_order_by_status(
+            status=self.status_reorder, date_create_start=self.date_start
+        )
 
         # Если заказов нет, то завершаем асинхронную сессию и возвращаемся
         if self.orders['count'] == '0':

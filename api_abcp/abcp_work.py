@@ -12,7 +12,7 @@ class WorkABCP:
     def __init__(self):
         self.api_abcp = Abcp(AUTH_API['HOST_API'], AUTH_API['USER_API'], AUTH_API['PASSWORD_API'])
 
-    async def get_order_by_status(self, status, date_create):
+    async def get_order_by_status(self, status, date_create_start=None, date_create_end=None):
         """
         Асинхронно получает список заказов с определенным статусом для уведомлений из API ABCP.
         :return: Словарь с данными по заказам:
@@ -23,7 +23,7 @@ class WorkABCP:
         try:
             logger.info(f"Получаем список заказов по статусу {status}")
             orders = await self.api_abcp.cp.admin.orders.get_orders_list(
-                status_code=status, date_created_start=date_create, format='p'
+                status_code=status, date_created_start=date_create_start, date_created_end=date_create_end, format='p'
             )
             logger.info(f"Получили по статусу {status} - {orders['count']} заказа(ов)")
         except Exception as e:
