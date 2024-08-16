@@ -275,13 +275,13 @@ class WorkGoogle:
     def convert_date(date: str) -> datetime.datetime:
         """
         Преобразуем дату полученной из Google таблицы в необходимый формат
-        Если дата больше года, то берем заказы за последние 364 дня.
+        Если дата больше 120 дней назад, то берем заказы за последние 120 дней.
         :param date: Строка с датой в формате '%d.%m.%Y'
         :return: Дата в формате datetime.datetime(2023, 11, 1, 0, 0)
         """
         date_start = dt.datetime.strptime(date, '%d.%m.%Y')
-        if (dt.datetime.utcnow() - date_start).days > 365:
-            date_start = dt.datetime.utcnow() - dt.timedelta(days=364)
+        if (dt.datetime.utcnow() - date_start).days > 120:
+            date_start = dt.datetime.utcnow() - dt.timedelta(days=120)
         return date_start
 
     @staticmethod
