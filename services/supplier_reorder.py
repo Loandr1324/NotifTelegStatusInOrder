@@ -5,7 +5,7 @@ import asyncio
 from api_abcp.abcp_work import WorkABCP
 from data_notif.csv_work import WorkCSV
 from loguru import logger
-from config import FILENAME_REORDER_ERROR, OUR_STOCK
+from config import FILENAME_REORDER_ERROR, OUR_STOCK, SPECIAL_SUPPLIERS_NEEDING_SHIPMENT_DATE
 from google_table.google_tb_work import WorkGoogle
 import re
 
@@ -203,6 +203,20 @@ class ReOrder:
             logger.info(f"Количество позиций для заказа: {len(positions)}")
             # Дробим количество позиций по 20 и оформляем заказы
             for i in range(0, len(positions), 20):
+
+                # Получаем параметры даты для специальных поставщиков с изменяемой датой доставки
+                if supplier in SPECIAL_SUPPLIERS_NEEDING_SHIPMENT_DATE:
+                    position_ids = [position['id'] for position in positions]
+                    params = await self.work_abcp.api_abcp.cp.admin.orders.get_online_order_params(
+                        position_ids=position_ids
+                    )
+                    date = ''
+                    for item in params['orderParams']:
+                        if item['fieldName'] == "shipmentDateDelivery":
+                            date = item['enum'][0]['value']
+                    self.positions_reorder_suppliers[supplier]['orderParams']['shipmentDate'] = date
+
+                # Оформляем заказ на пачку позиций
                 result = await self.work_abcp.create_order_supplier(
                     order_params=self.positions_reorder_suppliers[supplier]['orderParams'],
                     positions=positions[i:i + 20]
