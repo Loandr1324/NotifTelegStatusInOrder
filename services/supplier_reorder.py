@@ -215,6 +215,9 @@ class ReOrder:
                         if item['fieldName'] == "shipmentDateDelivery":
                             date = item['enum'][0]['value']
                     self.positions_reorder_suppliers[supplier]['orderParams']['shipmentDate'] = date
+                    logger.warning(f"Получили параметры заказа по поставщику autorus.ru")
+                    logger.warning(f"{params}")
+                    logger.warning(f"Взяли дату доставки из параметров shipmentDateDelivery: {date}")
 
                 # Оформляем заказ на пачку позиций
                 result = await self.work_abcp.create_order_supplier(
