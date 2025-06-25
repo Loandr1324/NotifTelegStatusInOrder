@@ -5,7 +5,7 @@ import asyncio
 from api_abcp.abcp_work import WorkABCP
 from data_notif.csv_work import WorkCSV
 from loguru import logger
-from config import FILENAME_REORDER_ERROR, OUR_STOCK, SPECIAL_SUPPLIERS_NEEDING_SHIPMENT_DATE
+from config import FILENAME_REORDER_ERROR, OUR_STOCK, SPECIAL_SUPPLIERS_NEEDING_SHIPMENT_DATE, SHIPMENT_ADDRESS
 from google_table.google_tb_work import WorkGoogle
 import re
 
@@ -208,7 +208,8 @@ class ReOrder:
                 if supplier in SPECIAL_SUPPLIERS_NEEDING_SHIPMENT_DATE:
                     position_ids = [position['id'] for position in positions]
                     params = await self.work_abcp.api_abcp.cp.admin.orders.get_online_order_params(
-                        position_ids=position_ids
+                        position_ids=position_ids,
+                        shipment_address=SHIPMENT_ADDRESS[str(supplier)]
                     )
                     date = ''
                     for item in params['orderParams']:
