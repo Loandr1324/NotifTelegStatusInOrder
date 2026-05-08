@@ -127,6 +127,7 @@ class ReOrder:
         """
         logger.info(f"Разделяем позиции, по разрешённым поставщикам")
         for order in self.orders['items']:
+            logger.debug(f"Заказ: {order['number']=} Дата: {order['date']}")
             order_test = ['262011475', '261989588', '261934957', '261913611', '261912582', '262027857', '262039831', '262044090']  # TODO Удалить после тестов
             if order['number'] in order_test:    # TODO Удалить после тестов
                 logger.debug(f"Проверяем заказ из списка с ошибками: {order['number']=}")
