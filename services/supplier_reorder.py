@@ -127,17 +127,9 @@ class ReOrder:
         """
         logger.info(f"Разделяем позиции, по разрешённым поставщикам")
         for order in self.orders['items']:
-            logger.info(f"Заказ: {order['number']=} Дата: {order['date']}")
-            order_test = ['262011475', '261989588', '261934957', '261913611', '261912582', '262027857', '262039831', '262044090']  # TODO Удалить после тестов
-            if order['number'] in order_test:    # TODO Удалить после тестов
-                logger.info(f"Проверяем заказ из списка с ошибками: {order['number']=}")
             # Проверяем присутствует ли менеджер в списке разрешённых
             if (order['managerId'] == '0' and order['userId'] not in self.allowed_users) or (
                     order['managerId'] != '0' and order['managerId'] not in self.allowed_managers):
-                if order['number'] in order_test:
-                    logger.info(f"Заказ {order['number']=} не пропущен из-за менеджера")    # TODO Удалить после тестов
-                    logger.info(f"{order['managerId']=}")    # TODO Удалить после тестов
-                    logger.info(f"{order['userId']=}")    # TODO Удалить после тестов
                 continue
 
             # Выбираем идентификатор и имя пользователя
@@ -399,12 +391,13 @@ class ReOrder:
         logger.info(f"Поставщики для заказа {self.positions_reorder_suppliers}")
         logger.error(f"Заблокированные поставщики {self.blocked_positions_suppliers}")
 
-        # TODO Закомментировать после тестов
+        # TODO Закомментировать после тестов. Получаем параметры поставщиков.
         # Получаем параметры для заказа по заблокированным поставщикам
         # if self.blocked_positions_suppliers:
         #     logger.debug(self.blocked_positions_suppliers)
         #     for key in self.blocked_positions_suppliers:
         #         logger.debug(key)
+        #         key = '137900'  # TODO Менять ключ на id нового поставщика
         #         params = await self.work_abcp.api_abcp.cp.admin.orders.get_online_order_params(
         #             self.blocked_positions_suppliers[key]
         #         )
