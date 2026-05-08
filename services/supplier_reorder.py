@@ -369,10 +369,11 @@ class ReOrder:
     async def reorder(self):
         """Оформляем заказы поставщикам по заданному статусу"""
         # Получаем список заказов для оформления заказов поставщикам
+        date_start = dt.now() - td(days=2)
         date_end = dt.now() - td(seconds=120)
-        logger.info(f"Получаем заказы с {self.date_start} по {date_end}")
+        logger.info(f"Получаем заказы изменённые с {date_start} по {date_end}")
         self.orders = await self.work_abcp.get_order_by_status(
-            status=self.status_reorder, date_create_start=self.date_start, date_create_end=date_end
+            status=self.status_reorder, date_updated_start=date_start, date_updated_end=date_end
         )
 
         # Если заказов нет, то завершаем асинхронную сессию и возвращаемся
