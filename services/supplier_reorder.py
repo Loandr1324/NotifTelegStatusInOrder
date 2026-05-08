@@ -127,9 +127,16 @@ class ReOrder:
         """
         logger.info(f"Разделяем позиции, по разрешённым поставщикам")
         for order in self.orders['items']:
+            order_test = ['262011475', '261989588', '261934957', '261913611', '261912582', '262027857', '262039831', '262044090']  # TODO Удалить после тестов
+            if order['number'] in order_test:    # TODO Удалить после тестов
+                logger.debug(f"Проверяем заказ из списка с ошибками: {order['number']=}")
             # Проверяем присутствует ли менеджер в списке разрешённых
             if (order['managerId'] == '0' and order['userId'] not in self.allowed_users) or (
                     order['managerId'] != '0' and order['managerId'] not in self.allowed_managers):
+                if order['number'] in order_test:
+                    logger.debug(f"Заказ {order['number']=} не пропущен из-за менеджера")    # TODO Удалить после тестов
+                    logger.debug(f"{order['managerId']=}")    # TODO Удалить после тестов
+                    logger.debug(f"{order['userId']=}")    # TODO Удалить после тестов
                 continue
 
             # Выбираем идентификатор и имя пользователя
